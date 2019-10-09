@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/thewizardplusplus/go-chess-models/uci"
 )
 
 func prompt() {
@@ -25,13 +27,27 @@ func main() {
 		case "exit", "quit":
 			os.Exit(0)
 		default:
-			fmt.Println(command)
+			move, err := uci.DecodeMove(command)
+			if err != nil {
+				log.Print(
+					"unable to decode a move: ",
+					err,
+				)
+
+				prompt()
+
+				continue
+			}
+
+			fmt.Println(move)
 		}
 
 		prompt()
 	}
 	if err := scanner.Err(); err != nil {
-		const msg = "unable to read a command: "
-		log.Fatal(msg, err)
+		log.Fatal(
+			"unable to read a command: ",
+			err,
+		)
 	}
 }
