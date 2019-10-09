@@ -21,7 +21,13 @@ func main() {
 		command = strings.TrimSpace(command)
 		command = strings.ToLower(command)
 
-		fmt.Println(command)
+		switch command {
+		case "exit", "quit":
+			os.Exit(0)
+		default:
+			fmt.Println(command)
+		}
+
 		prompt()
 	}
 	if err := scanner.Err(); err != nil {
