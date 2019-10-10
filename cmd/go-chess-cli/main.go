@@ -82,6 +82,15 @@ func main() {
 				continue
 			}
 
+			err = storage.CheckMove(move)
+			if err != nil {
+				log.Print("incorrect move: ", err)
+
+				printPrompt()
+
+				continue
+			}
+
 			storage = storage.ApplyMove(move)
 			printStorage(storage)
 		}
