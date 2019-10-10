@@ -82,7 +82,8 @@ func main() {
 				continue
 			}
 
-			fmt.Println(move)
+			storage = storage.ApplyMove(move)
+			printStorage(storage)
 		}
 
 		printPrompt()
