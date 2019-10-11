@@ -16,8 +16,21 @@ import (
 func printStorage(
 	storage models.PieceStorage,
 ) {
+	fmt.Print(" ")
+	width := storage.Size().Width
+	for i := 0; i < width; i++ {
+		fmt.Print(string(i + 97))
+	}
+	fmt.Println()
+
 	positions := storage.Size().Positions()
+	previousRank := -1
 	for _, position := range positions {
+		if position.Rank != previousRank {
+			previousRank = position.Rank
+			fmt.Print(position.Rank + 1)
+		}
+
 		piece, ok := storage.Piece(position)
 		if ok {
 			fmt.Print(uci.EncodePiece(piece))
