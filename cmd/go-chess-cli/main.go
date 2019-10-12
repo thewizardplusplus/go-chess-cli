@@ -6,12 +6,105 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strings"
+	"time"
 
+	minimax "github.com/thewizardplusplus/go-chess-minimax"
+	"github.com/thewizardplusplus/go-chess-minimax/caches"
+	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
+	"github.com/thewizardplusplus/go-chess-minimax/terminators"
 	models "github.com/thewizardplusplus/go-chess-models"
+	"github.com/thewizardplusplus/go-chess-models/games"
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 	"github.com/thewizardplusplus/go-chess-models/uci"
 )
+
+var (
+	generator models.MoveGenerator
+	evaluator evaluators.MaterialEvaluator
+)
+
+func newAlphaBetaSearcher(
+	terminator terminators.SearchTerminator,
+) minimax.MoveSearcher {
+	return minimax.NewAlphaBetaSearcher(
+		generator,
+		terminator,
+		evaluator,
+	)
+}
+
+func newParallelSearcher(
+	cache caches.Cache,
+	terminator terminators.SearchTerminator,
+) minimax.MoveSearcher {
+	return minimax.NewParallelSearcher(
+		terminator,
+		runtime.NumCPU(),
+		func() minimax.MoveSearcher {
+			innerSearcher := newAlphaBetaSearcher(
+				// terminator will be set
+				// automatically
+				// by the iterative searcher
+				nil,
+			)
+
+			// make and bind a cached searcher
+			// to inner one
+			minimax.NewCachedSearcher(
+				innerSearcher,
+				cache,
+			)
+
+			return minimax.NewIterativeSearcher(
+				innerSearcher,
+				// terminator will be set
+				// automatically
+				// by the parallel searcher
+				nil,
+			)
+		},
+	)
+}
+
+func newGame(
+	storage models.PieceStorage,
+	maxDeep int,
+	maxDuration time.Duration,
+	maxCacheSize int,
+) (*games.Manual, error) {
+	checker := newAlphaBetaSearcher(
+		terminators.NewDeepTerminator(1),
+	)
+
+	cache := caches.NewStringHashingCache(
+		maxCacheSize,
+		uci.EncodePieceStorage,
+	)
+	parallelCache :=
+		caches.NewParallelCache(cache)
+	searcher := newParallelSearcher(
+		parallelCache,
+		terminators.NewGroupTerminator(
+			terminators.NewDeepTerminator(
+				maxDeep,
+			),
+			terminators.NewTimeTerminator(
+				time.Now,
+				maxDuration,
+			),
+		),
+	)
+
+	return games.NewManual(
+		storage,
+		minimax.SearcherAdapter{checker},
+		minimax.SearcherAdapter{searcher},
+		models.Black,
+		models.Black,
+	)
+}
 
 func printStorage(
 	storage models.PieceStorage,
@@ -55,6 +148,21 @@ func main() {
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
 		"board in FEN",
 	)
+	maxDeep := flag.Int(
+		"deep",
+		10,
+		"maximal deep",
+	)
+	maxDuration := flag.Duration(
+		"duration",
+		5*time.Second,
+		"maximal duration",
+	)
+	maxCacheSize := flag.Int(
+		"cache",
+		1e6,
+		"maximal cache size",
+	)
 	flag.Parse()
 
 	storage, err := uci.DecodePieceStorage(
@@ -69,43 +177,93 @@ func main() {
 		)
 	}
 
-	printStorage(storage)
+	game, err := newGame(
+		storage,
+		*maxDeep,
+		*maxDuration,
+		*maxCacheSize,
+	)
+	if err != nil {
+		log.Fatal(
+			"unable to start a game: ",
+			err,
+		)
+	}
+	if game.State() != nil {
+		fmt.Println(
+			"game in state: ",
+			game.State(),
+		)
+		os.Exit(0)
+	}
 
-	scanner := bufio.NewScanner(os.Stdin)
+	printStorage(game.Storage())
 	printPrompt()
 
+	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		command := scanner.Text()
 		command = strings.TrimSpace(command)
 		command = strings.ToLower(command)
-
-		switch command {
-		case "exit", "quit":
+		if command == "exit" {
 			os.Exit(0)
-		default:
-			move, err := uci.DecodeMove(command)
-			if err != nil {
-				log.Print(
-					"unable to decode a move: ",
-					err,
-				)
+		}
 
-				printPrompt()
+		move, err := uci.DecodeMove(command)
+		if err != nil {
+			log.Print(
+				"unable to decode the move: ",
+				err,
+			)
 
-				continue
-			}
+			printStorage(game.Storage())
+			printPrompt()
 
-			err = storage.CheckMove(move)
-			if err != nil {
-				log.Print("incorrect move: ", err)
+			continue
+		}
 
-				printPrompt()
+		err = game.ApplyMove(move)
+		if err != nil {
+			log.Print(
+				"unable to apply the move: ",
+				err,
+			)
 
-				continue
-			}
+			printStorage(game.Storage())
+			printPrompt()
 
-			storage = storage.ApplyMove(move)
-			printStorage(storage)
+			continue
+		}
+
+		printStorage(game.Storage())
+		if game.State() != nil {
+			fmt.Println(
+				"game in state: ",
+				game.State(),
+			)
+			os.Exit(0)
+		}
+
+		move, err = game.SearchMove()
+		if err != nil {
+			log.Print(
+				"unable to search a move: ",
+				err,
+			)
+
+			continue
+		}
+
+		printPrompt()
+		fmt.Println(uci.EncodeMove(move))
+
+		printStorage(game.Storage())
+		if game.State() != nil {
+			fmt.Println(
+				"game in state: ",
+				game.State(),
+			)
+			os.Exit(0)
 		}
 
 		printPrompt()
