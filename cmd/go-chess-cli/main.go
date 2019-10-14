@@ -25,9 +25,12 @@ var (
 	evaluator evaluators.MaterialEvaluator
 )
 
-func newAlphaBetaSearcher(
-	terminator terminators.SearchTerminator,
-) minimax.MoveSearcher {
+func newChecker() minimax.MoveSearcher {
+	// limit to the minimum value
+	// at which all checks are performed
+	terminator :=
+		terminators.NewDeepTerminator(1)
+
 	return minimax.NewAlphaBetaSearcher(
 		generator,
 		terminator,
@@ -35,20 +38,42 @@ func newAlphaBetaSearcher(
 	)
 }
 
-func newParallelSearcher(
-	cache caches.Cache,
-	terminator terminators.SearchTerminator,
+func newSearcher(
+	maxDeep int,
+	maxDuration time.Duration,
+	maxCacheSize int,
 ) minimax.MoveSearcher {
+	terminator :=
+		terminators.NewGroupTerminator(
+			terminators.NewDeepTerminator(
+				maxDeep,
+			),
+			terminators.NewTimeTerminator(
+				time.Now,
+				maxDuration,
+			),
+		)
+
+	cache := caches.NewParallelCache(
+		caches.NewStringHashingCache(
+			maxCacheSize,
+			uci.EncodePieceStorage,
+		),
+	)
+
 	return minimax.NewParallelSearcher(
 		terminator,
 		runtime.NumCPU(),
 		func() minimax.MoveSearcher {
-			innerSearcher := newAlphaBetaSearcher(
-				// terminator will be set
-				// automatically
-				// by the iterative searcher
-				nil,
-			)
+			innerSearcher :=
+				minimax.NewAlphaBetaSearcher(
+					generator,
+					// terminator will be set
+					// automatically
+					// by the iterative searcher
+					nil,
+					evaluator,
+				)
 
 			// make and bind a cached searcher
 			// to inner one
@@ -73,28 +98,13 @@ func newGame(
 	maxDeep int,
 	maxDuration time.Duration,
 	maxCacheSize int,
-) (*games.Manual, error) {
-	checker := newAlphaBetaSearcher(
-		terminators.NewDeepTerminator(1),
-	)
+) (games.Manual, error) {
+	checker := newChecker()
 
-	cache := caches.NewStringHashingCache(
+	searcher := newSearcher(
+		maxDeep,
+		maxDuration,
 		maxCacheSize,
-		uci.EncodePieceStorage,
-	)
-	parallelCache :=
-		caches.NewParallelCache(cache)
-	searcher := newParallelSearcher(
-		parallelCache,
-		terminators.NewGroupTerminator(
-			terminators.NewDeepTerminator(
-				maxDeep,
-			),
-			terminators.NewTimeTerminator(
-				time.Now,
-				maxDuration,
-			),
-		),
 	)
 
 	return games.NewManual(
@@ -102,7 +112,7 @@ func newGame(
 		minimax.SearcherAdapter{checker},
 		minimax.SearcherAdapter{searcher},
 		models.Black,
-		models.Black,
+		models.White,
 	)
 }
 
