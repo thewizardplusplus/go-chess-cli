@@ -39,21 +39,8 @@ func newChecker() minimax.MoveSearcher {
 }
 
 func newSearcher(
-	maxDeep int,
-	maxDuration time.Duration,
 	maxCacheSize int,
 ) minimax.MoveSearcher {
-	terminator :=
-		terminators.NewGroupTerminator(
-			terminators.NewDeepTerminator(
-				maxDeep,
-			),
-			terminators.NewTimeTerminator(
-				time.Now,
-				maxDuration,
-			),
-		)
-
 	cache := caches.NewParallelCache(
 		caches.NewStringHashingCache(
 			maxCacheSize,
@@ -62,7 +49,9 @@ func newSearcher(
 	)
 
 	return minimax.NewParallelSearcher(
-		terminator,
+		// terminator will be set
+		// before each search
+		nil,
 		runtime.NumCPU(),
 		func() minimax.MoveSearcher {
 			innerSearcher :=
@@ -95,17 +84,9 @@ func newSearcher(
 
 func newGame(
 	storage models.PieceStorage,
-	maxDeep int,
-	maxDuration time.Duration,
-	maxCacheSize int,
+	searcher minimax.MoveSearcher,
 ) (games.Manual, error) {
 	checker := newChecker()
-
-	searcher := newSearcher(
-		maxDeep,
-		maxDuration,
-		maxCacheSize,
-	)
 
 	return games.NewManual(
 		storage,
@@ -119,7 +100,7 @@ func newGame(
 func printStorage(
 	storage models.PieceStorage,
 ) {
-	fmt.Print(" ")
+	fmt.Print("\n ")
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
 		fmt.Print(string(i + 97))
@@ -146,6 +127,7 @@ func printStorage(
 			fmt.Println()
 		}
 	}
+	fmt.Println()
 }
 
 func printPrompt() {
@@ -155,7 +137,9 @@ func printPrompt() {
 func main() {
 	boardInFEN := flag.String(
 		"fen",
-		"rnbqk/ppppp/5/PPPPP/RNBQK",
+		//"rnbqk/ppppp/5/PPPPP/RNBQK",
+		"rnbqkbnr/pppppppp/8/8"+
+			"/8/8/PPPPPPPP/RNBQKBNR",
 		"board in FEN",
 	)
 	maxDeep := flag.Int(
@@ -187,12 +171,8 @@ func main() {
 		)
 	}
 
-	game, err := newGame(
-		storage,
-		*maxDeep,
-		*maxDuration,
-		*maxCacheSize,
-	)
+	searcher := newSearcher(*maxCacheSize)
+	game, err := newGame(storage, searcher)
 	if err != nil {
 		log.Fatal(
 			"unable to start a game: ",
@@ -253,6 +233,18 @@ func main() {
 			)
 			os.Exit(0)
 		}
+
+		searcher.SetTerminator(
+			terminators.NewGroupTerminator(
+				terminators.NewDeepTerminator(
+					*maxDeep,
+				),
+				terminators.NewTimeTerminator(
+					time.Now,
+					*maxDuration,
+				),
+			),
+		)
 
 		move, err = game.SearchMove()
 		if err != nil {
