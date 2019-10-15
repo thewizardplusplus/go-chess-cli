@@ -142,11 +142,6 @@ func main() {
 			"/8/8/PPPPPPPP/RNBQKBNR",
 		"board in FEN",
 	)
-	maxDeep := flag.Int(
-		"deep",
-		10,
-		"maximal deep",
-	)
 	maxDuration := flag.Duration(
 		"duration",
 		5*time.Second,
@@ -235,14 +230,9 @@ func main() {
 		}
 
 		searcher.SetTerminator(
-			terminators.NewGroupTerminator(
-				terminators.NewDeepTerminator(
-					*maxDeep,
-				),
-				terminators.NewTimeTerminator(
-					time.Now,
-					*maxDuration,
-				),
+			terminators.NewTimeTerminator(
+				time.Now,
+				*maxDuration,
 			),
 		)
 
