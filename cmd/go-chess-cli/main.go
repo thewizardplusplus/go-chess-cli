@@ -15,9 +15,9 @@ import (
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
 	"github.com/thewizardplusplus/go-chess-minimax/terminators"
 	models "github.com/thewizardplusplus/go-chess-models"
+	"github.com/thewizardplusplus/go-chess-models/encoding/uci"
 	"github.com/thewizardplusplus/go-chess-models/games"
 	"github.com/thewizardplusplus/go-chess-models/pieces"
-	"github.com/thewizardplusplus/go-chess-models/uci"
 )
 
 var (
