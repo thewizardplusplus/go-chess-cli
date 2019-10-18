@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	cli "github.com/thewizardplusplus/go-chess-cli"
 	minimax "github.com/thewizardplusplus/go-chess-minimax"
 	"github.com/thewizardplusplus/go-chess-minimax/caches"
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
@@ -97,39 +98,6 @@ func newGame(
 	)
 }
 
-func printStorage(
-	storage models.PieceStorage,
-) {
-	fmt.Print("\n ")
-	width := storage.Size().Width
-	for i := 0; i < width; i++ {
-		fmt.Print(string(i + 97))
-	}
-	fmt.Println()
-
-	positions := storage.Size().Positions()
-	previousRank := -1
-	for _, position := range positions {
-		if position.Rank != previousRank {
-			previousRank = position.Rank
-			fmt.Print(position.Rank + 1)
-		}
-
-		piece, ok := storage.Piece(position)
-		if ok {
-			fmt.Print(uci.EncodePiece(piece))
-		} else {
-			fmt.Print(".")
-		}
-
-		lastFile := storage.Size().Height - 1
-		if position.File == lastFile {
-			fmt.Println()
-		}
-	}
-	fmt.Println()
-}
-
 func printPrompt() {
 	fmt.Print("> ")
 }
@@ -182,7 +150,14 @@ func main() {
 		os.Exit(0)
 	}
 
-	printStorage(game.Storage())
+	encoder := cli.PieceStorageEncoder{
+		PieceEncoder: uci.EncodePiece,
+		Separator:    "x",
+		TopColor:     models.Black,
+	}
+	fmt.Println(
+		encoder.Encode(game.Storage()),
+	)
 	printPrompt()
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -201,7 +176,9 @@ func main() {
 				err,
 			)
 
-			printStorage(game.Storage())
+			fmt.Println(
+				encoder.Encode(game.Storage()),
+			)
 			printPrompt()
 
 			continue
@@ -214,13 +191,17 @@ func main() {
 				err,
 			)
 
-			printStorage(game.Storage())
+			fmt.Println(
+				encoder.Encode(game.Storage()),
+			)
 			printPrompt()
 
 			continue
 		}
 
-		printStorage(game.Storage())
+		fmt.Println(
+			encoder.Encode(game.Storage()),
+		)
 		if game.State() != nil {
 			fmt.Println(
 				"game in state: ",
@@ -249,7 +230,9 @@ func main() {
 		printPrompt()
 		fmt.Println(uci.EncodeMove(move))
 
-		printStorage(game.Storage())
+		fmt.Println(
+			encoder.Encode(game.Storage()),
+		)
 		if game.State() != nil {
 			fmt.Println(
 				"game in state: ",
