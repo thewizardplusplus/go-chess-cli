@@ -50,7 +50,7 @@ func (encoder PieceStorageEncoder) Encode(
 		reverse(ranks)
 	}
 
-	var legendRank string
+	legendRank := " "
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
 		legendRank += string(i + 97)
