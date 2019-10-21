@@ -98,8 +98,8 @@ func newGame(
 	)
 }
 
-func printPrompt(name string) {
-	fmt.Printf("%s> ", name)
+func printPrompt(side string) {
+	fmt.Printf("%s> ", side)
 }
 
 func main() {
