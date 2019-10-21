@@ -17,9 +17,9 @@ func TestPieceStorageEncoderEncode(
 	test *testing.T,
 ) {
 	type fields struct {
-		pieceEncoder PieceEncoder
-		separator    string
-		topColor     models.Color
+		pieceEncoder     PieceEncoder
+		piecePlaceholder string
+		topColor         models.Color
 	}
 	type args struct {
 		boardInFEN string
@@ -33,9 +33,9 @@ func TestPieceStorageEncoderEncode(
 	for _, data := range []data{
 		data{
 			fields: fields{
-				pieceEncoder: uci.EncodePiece,
-				separator:    "x",
-				topColor:     models.Black,
+				pieceEncoder:     uci.EncodePiece,
+				piecePlaceholder: "x",
+				topColor:         models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -52,9 +52,9 @@ func TestPieceStorageEncoderEncode(
 		},
 		data{
 			fields: fields{
-				pieceEncoder: uci.EncodePiece,
-				separator:    "x",
-				topColor:     models.White,
+				pieceEncoder:     uci.EncodePiece,
+				piecePlaceholder: "x",
+				topColor:         models.White,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -82,8 +82,9 @@ func TestPieceStorageEncoderEncode(
 
 		encoder := PieceStorageEncoder{
 			PieceEncoder: data.fields.pieceEncoder,
-			Separator:    data.fields.separator,
-			TopColor:     data.fields.topColor,
+			PiecePlaceholder: data.fields.
+				piecePlaceholder,
+			TopColor: data.fields.topColor,
 		}
 		got := encoder.Encode(storage)
 

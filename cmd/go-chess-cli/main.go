@@ -98,8 +98,8 @@ func newGame(
 	)
 }
 
-func printPrompt() {
-	fmt.Print("> ")
+func printPrompt(name string) {
+	fmt.Printf("%s> ", name)
 }
 
 func main() {
@@ -142,26 +142,33 @@ func main() {
 			err,
 		)
 	}
-	if game.State() != nil {
-		fmt.Println(
-			"game in state: ",
-			game.State(),
-		)
-		os.Exit(0)
-	}
 
 	encoder := cli.PieceStorageEncoder{
-		PieceEncoder: uci.EncodePiece,
-		Separator:    "x",
-		TopColor:     models.Black,
+		PieceEncoder:     uci.EncodePiece,
+		PiecePlaceholder: "x",
+		TopColor:         models.Black,
 	}
-	fmt.Println(
-		encoder.Encode(game.Storage()),
-	)
-	printPrompt()
-
 	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
+	for {
+		fmt.Println(
+			encoder.Encode(game.Storage()),
+		)
+		if game.State() != nil {
+			fmt.Println(
+				"game in state: ",
+				game.State(),
+			)
+
+			break
+		}
+
+		printPrompt("user")
+
+		ok := scanner.Scan()
+		if !ok {
+			break
+		}
+
 		command := scanner.Text()
 		command = strings.TrimSpace(command)
 		command = strings.ToLower(command)
@@ -176,11 +183,6 @@ func main() {
 				err,
 			)
 
-			fmt.Println(
-				encoder.Encode(game.Storage()),
-			)
-			printPrompt()
-
 			continue
 		}
 
@@ -191,11 +193,6 @@ func main() {
 				err,
 			)
 
-			fmt.Println(
-				encoder.Encode(game.Storage()),
-			)
-			printPrompt()
-
 			continue
 		}
 
@@ -207,8 +204,11 @@ func main() {
 				"game in state: ",
 				game.State(),
 			)
-			os.Exit(0)
+
+			break
 		}
+
+		printPrompt("searcher")
 
 		searcher.SetTerminator(
 			terminators.NewTimeTerminator(
@@ -217,31 +217,8 @@ func main() {
 			),
 		)
 
-		move, err = game.SearchMove()
-		if err != nil {
-			log.Print(
-				"unable to search a move: ",
-				err,
-			)
-
-			continue
-		}
-
-		printPrompt()
+		move = game.SearchMove()
 		fmt.Println(uci.EncodeMove(move))
-
-		fmt.Println(
-			encoder.Encode(game.Storage()),
-		)
-		if game.State() != nil {
-			fmt.Println(
-				"game in state: ",
-				game.State(),
-			)
-			os.Exit(0)
-		}
-
-		printPrompt()
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(
