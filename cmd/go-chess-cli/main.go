@@ -100,8 +100,11 @@ func newGame(
 	)
 }
 
-func printPrompt(side string) {
-	fmt.Printf("%s> ", side)
+func printPrompt(
+	side string,
+	separator rune,
+) {
+	fmt.Printf("%s%c ", side, separator)
 }
 
 func main() {
@@ -114,10 +117,10 @@ func main() {
 			"/8/8/PPPPPPPP/RNBQKBNR",
 		"board in FEN",
 	)
-	userColor := flag.String(
+	humanColor := flag.String(
 		"color",
 		"random",
-		"user color "+
+		"human color "+
 			"(allowed: black, white, random)",
 	)
 	maxDuration := flag.Duration(
@@ -145,7 +148,7 @@ func main() {
 	}
 
 	var searcherColor models.Color
-	switch *userColor {
+	switch *humanColor {
 	case "black":
 		searcherColor = models.White
 	case "white":
@@ -154,7 +157,7 @@ func main() {
 		searcherColor =
 			models.Color(rand.Intn(2))
 	default:
-		log.Fatal("incorrect user color")
+		log.Fatal("incorrect human color")
 	}
 
 	searcher := newSearcher(*maxCacheSize)
@@ -192,7 +195,7 @@ func main() {
 
 		if !firstMove ||
 			searcherColor == models.Black {
-			printPrompt("user")
+			printPrompt("human", '>')
 
 			ok := scanner.Scan()
 			if !ok {
@@ -239,7 +242,7 @@ func main() {
 			}
 		}
 
-		printPrompt("searcher")
+		printPrompt("ai", ':')
 
 		searcher.SetTerminator(
 			terminators.NewTimeTerminator(
