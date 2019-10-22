@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 	"strings"
@@ -86,6 +87,7 @@ func newSearcher(
 func newGame(
 	storage models.PieceStorage,
 	searcher minimax.MoveSearcher,
+	searcherColor models.Color,
 ) (games.Manual, error) {
 	checker := newChecker()
 
@@ -93,7 +95,7 @@ func newGame(
 		storage,
 		minimax.SearcherAdapter{checker},
 		minimax.SearcherAdapter{searcher},
-		models.Black,
+		searcherColor,
 		models.White,
 	)
 }
@@ -103,12 +105,20 @@ func printPrompt(side string) {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	boardInFEN := flag.String(
 		"fen",
 		//"rnbqk/ppppp/5/PPPPP/RNBQK",
 		"rnbqkbnr/pppppppp/8/8"+
 			"/8/8/PPPPPPPP/RNBQKBNR",
 		"board in FEN",
+	)
+	userColor := flag.String(
+		"color",
+		"random",
+		"user color "+
+			"(allowed: black, white, random)",
 	)
 	maxDuration := flag.Duration(
 		"duration",
@@ -134,8 +144,25 @@ func main() {
 		)
 	}
 
+	var searcherColor models.Color
+	switch *userColor {
+	case "black":
+		searcherColor = models.White
+	case "white":
+		searcherColor = models.Black
+	case "random":
+		searcherColor =
+			models.Color(rand.Intn(2))
+	default:
+		log.Fatal("incorrect user color")
+	}
+
 	searcher := newSearcher(*maxCacheSize)
-	game, err := newGame(storage, searcher)
+	game, err := newGame(
+		storage,
+		searcher,
+		searcherColor,
+	)
 	if err != nil {
 		log.Fatal(
 			"unable to start a game: ",
@@ -146,8 +173,9 @@ func main() {
 	encoder := cli.PieceStorageEncoder{
 		PieceEncoder:     uci.EncodePiece,
 		PiecePlaceholder: "x",
-		TopColor:         models.Black,
+		TopColor:         searcherColor,
 	}
+	firstMove := true
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Println(
@@ -162,50 +190,53 @@ func main() {
 			break
 		}
 
-		printPrompt("user")
+		if !firstMove ||
+			searcherColor == models.Black {
+			printPrompt("user")
 
-		ok := scanner.Scan()
-		if !ok {
-			break
-		}
+			ok := scanner.Scan()
+			if !ok {
+				break
+			}
 
-		command := scanner.Text()
-		command = strings.TrimSpace(command)
-		command = strings.ToLower(command)
-		if command == "exit" {
-			os.Exit(0)
-		}
+			command := scanner.Text()
+			command = strings.TrimSpace(command)
+			command = strings.ToLower(command)
+			if command == "exit" {
+				os.Exit(0)
+			}
 
-		move, err := uci.DecodeMove(command)
-		if err != nil {
-			log.Print(
-				"unable to decode the move: ",
-				err,
-			)
+			move, err := uci.DecodeMove(command)
+			if err != nil {
+				log.Print(
+					"unable to decode the move: ",
+					err,
+				)
 
-			continue
-		}
+				continue
+			}
 
-		err = game.ApplyMove(move)
-		if err != nil {
-			log.Print(
-				"unable to apply the move: ",
-				err,
-			)
+			err = game.ApplyMove(move)
+			if err != nil {
+				log.Print(
+					"unable to apply the move: ",
+					err,
+				)
 
-			continue
-		}
+				continue
+			}
 
-		fmt.Println(
-			encoder.Encode(game.Storage()),
-		)
-		if game.State() != nil {
 			fmt.Println(
-				"game in state: ",
-				game.State(),
+				encoder.Encode(game.Storage()),
 			)
+			if game.State() != nil {
+				fmt.Println(
+					"game in state: ",
+					game.State(),
+				)
 
-			break
+				break
+			}
 		}
 
 		printPrompt("searcher")
@@ -217,8 +248,10 @@ func main() {
 			),
 		)
 
-		move = game.SearchMove()
+		move := game.SearchMove()
 		fmt.Println(uci.EncodeMove(move))
+
+		firstMove = false
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(
