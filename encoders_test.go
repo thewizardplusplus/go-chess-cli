@@ -1,6 +1,7 @@
 package chesscli
 
 import (
+	"reflect"
 	"testing"
 
 	models "github.com/thewizardplusplus/go-chess-models"
@@ -13,13 +14,41 @@ const (
 		"/1p2P3/2N2Q1p/PPPBBPPP/R3K2R"
 )
 
+func TestNewPieceStorageEncoder(
+	test *testing.T,
+) {
+	encoder := NewPieceStorageEncoder(
+		uci.EncodePiece,
+		"x",
+		models.White,
+	)
+
+	gotEncoder := reflect.
+		ValueOf(encoder.encoder).
+		Pointer()
+	wantEncoder := reflect.
+		ValueOf(uci.EncodePiece).
+		Pointer()
+	if gotEncoder != wantEncoder {
+		test.Fail()
+	}
+
+	if encoder.placeholder != "x" {
+		test.Fail()
+	}
+
+	if encoder.topColor != models.White {
+		test.Fail()
+	}
+}
+
 func TestPieceStorageEncoderEncode(
 	test *testing.T,
 ) {
 	type fields struct {
-		pieceEncoder     PieceEncoder
-		piecePlaceholder string
-		topColor         models.Color
+		encoder     PieceEncoder
+		placeholder string
+		topColor    models.Color
 	}
 	type args struct {
 		boardInFEN string
@@ -33,9 +62,9 @@ func TestPieceStorageEncoderEncode(
 	for _, data := range []data{
 		data{
 			fields: fields{
-				pieceEncoder:     uci.EncodePiece,
-				piecePlaceholder: "x",
-				topColor:         models.Black,
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				topColor:    models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -52,9 +81,9 @@ func TestPieceStorageEncoderEncode(
 		},
 		data{
 			fields: fields{
-				pieceEncoder:     uci.EncodePiece,
-				piecePlaceholder: "x",
-				topColor:         models.White,
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				topColor:    models.White,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -81,10 +110,9 @@ func TestPieceStorageEncoderEncode(
 		}
 
 		encoder := PieceStorageEncoder{
-			PieceEncoder: data.fields.pieceEncoder,
-			PiecePlaceholder: data.fields.
-				piecePlaceholder,
-			TopColor: data.fields.topColor,
+			encoder:     data.fields.encoder,
+			placeholder: data.fields.placeholder,
+			topColor:    data.fields.topColor,
 		}
 		got := encoder.Encode(storage)
 

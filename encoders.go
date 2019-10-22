@@ -14,9 +14,22 @@ type PieceEncoder func(
 
 // PieceStorageEncoder ...
 type PieceStorageEncoder struct {
-	PieceEncoder     PieceEncoder
-	PiecePlaceholder string
-	TopColor         models.Color
+	encoder     PieceEncoder
+	placeholder string
+	topColor    models.Color
+}
+
+// NewPieceStorageEncoder ...
+func NewPieceStorageEncoder(
+	encoder PieceEncoder,
+	placeholder string,
+	topColor models.Color,
+) PieceStorageEncoder {
+	return PieceStorageEncoder{
+		encoder:     encoder,
+		placeholder: placeholder,
+		topColor:    topColor,
+	}
 }
 
 // Encode ...
@@ -34,10 +47,9 @@ func (encoder PieceStorageEncoder) Encode(
 
 		piece, ok := storage.Piece(position)
 		if ok {
-			currentRank +=
-				encoder.PieceEncoder(piece)
+			currentRank += encoder.encoder(piece)
 		} else {
-			currentRank += encoder.PiecePlaceholder
+			currentRank += encoder.placeholder
 		}
 
 		lastFile := storage.Size().Height - 1
@@ -46,7 +58,7 @@ func (encoder PieceStorageEncoder) Encode(
 			currentRank = ""
 		}
 	}
-	if encoder.TopColor == models.Black {
+	if encoder.topColor == models.Black {
 		reverse(ranks)
 	}
 

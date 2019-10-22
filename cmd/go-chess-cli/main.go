@@ -173,11 +173,11 @@ func main() {
 		)
 	}
 
-	encoder := cli.PieceStorageEncoder{
-		PieceEncoder:     uci.EncodePiece,
-		PiecePlaceholder: "x",
-		TopColor:         searcherColor,
-	}
+	encoder := cli.NewPieceStorageEncoder(
+		uci.EncodePiece,
+		"x",
+		searcherColor,
+	)
 	firstMove := true
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
