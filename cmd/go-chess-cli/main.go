@@ -84,7 +84,7 @@ func newSearcher(
 	)
 }
 
-func newGame(
+func newGameModel(
 	storage models.PieceStorage,
 	searcher minimax.MoveSearcher,
 	searcherColor models.Color,
@@ -161,7 +161,7 @@ func main() {
 	}
 
 	searcher := newSearcher(*maxCacheSize)
-	game, err := newGame(
+	gameModel, err := newGameModel(
 		storage,
 		searcher,
 		searcherColor,
@@ -178,24 +178,25 @@ func main() {
 		"x",
 		searcherColor,
 	)
+	game := cli.NewGame(
+		gameModel,
+		encoder.Encode,
+		os.Stdout,
+	)
 	firstMove := true
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Println(
-			encoder.Encode(game.Storage()),
-		)
-		if game.State() != nil {
-			fmt.Println(
-				"game in state: ",
-				game.State(),
-			)
-
-			break
-		}
-
 		if !firstMove ||
 			searcherColor == models.Black {
-			printPrompt("human", '>')
+			err := game.WritePrompt("human> ")
+			switch err {
+			case nil:
+			case games.ErrCheckmate,
+				games.ErrDraw:
+				fmt.Println("game in state: ", err)
+			default:
+				log.Fatal(err)
+			}
 
 			ok := scanner.Scan()
 			if !ok {
@@ -219,7 +220,7 @@ func main() {
 				continue
 			}
 
-			err = game.ApplyMove(move)
+			err = gameModel.ApplyMove(move)
 			if err != nil {
 				log.Print(
 					"unable to apply the move: ",
@@ -228,21 +229,17 @@ func main() {
 
 				continue
 			}
-
-			fmt.Println(
-				encoder.Encode(game.Storage()),
-			)
-			if game.State() != nil {
-				fmt.Println(
-					"game in state: ",
-					game.State(),
-				)
-
-				break
-			}
 		}
 
-		printPrompt("ai", ':')
+		err := game.WritePrompt("ai: ")
+		switch err {
+		case nil:
+		case games.ErrCheckmate,
+			games.ErrDraw:
+			fmt.Println("game in state: ", err)
+		default:
+			log.Fatal(err)
+		}
 
 		searcher.SetTerminator(
 			terminators.NewTimeTerminator(
@@ -251,7 +248,7 @@ func main() {
 			),
 		)
 
-		move := game.SearchMove()
+		move := gameModel.SearchMove()
 		fmt.Println(uci.EncodeMove(move))
 
 		firstMove = false
