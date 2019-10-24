@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	cli "github.com/thewizardplusplus/go-chess-cli"
@@ -181,53 +179,30 @@ func main() {
 	game := cli.NewGame(
 		gameModel,
 		encoder.Encode,
+		os.Stdin,
 		os.Stdout,
+		"human>",
+		"exit",
 	)
 	firstMove := true
-	scanner := bufio.NewScanner(os.Stdin)
+loop:
 	for {
 		if !firstMove ||
 			searcherColor == models.Black {
-			err := game.WritePrompt("human> ")
+			err := game.ReadMove()
 			switch err {
 			case nil:
+			case cli.ErrExit:
+				break loop
 			case games.ErrCheckmate,
 				games.ErrDraw:
-				fmt.Println("game in state: ", err)
+				const message = "game in state: " +
+					"%s\n"
+				fmt.Printf(message, err)
+				break loop
 			default:
-				log.Fatal(err)
-			}
-
-			ok := scanner.Scan()
-			if !ok {
-				break
-			}
-
-			command := scanner.Text()
-			command = strings.TrimSpace(command)
-			command = strings.ToLower(command)
-			if command == "exit" {
-				os.Exit(0)
-			}
-
-			move, err := uci.DecodeMove(command)
-			if err != nil {
-				log.Print(
-					"unable to decode the move: ",
-					err,
-				)
-
-				continue
-			}
-
-			err = gameModel.ApplyMove(move)
-			if err != nil {
-				log.Print(
-					"unable to apply the move: ",
-					err,
-				)
-
-				continue
+				fmt.Printf("error: %s\n", err)
+				continue loop
 			}
 		}
 
@@ -252,11 +227,5 @@ func main() {
 		fmt.Println(uci.EncodeMove(move))
 
 		firstMove = false
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(
-			"unable to read a command: ",
-			err,
-		)
 	}
 }

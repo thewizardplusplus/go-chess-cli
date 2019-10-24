@@ -1,10 +1,20 @@
 package chesscli
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	models "github.com/thewizardplusplus/go-chess-models"
+	"github.com/thewizardplusplus/go-chess-models/encoding/uci"
+	"github.com/thewizardplusplus/go-chess-models/games"
+)
+
+// ...
+var (
+	ErrExit = errors.New("exit")
 )
 
 // GameModel ...
@@ -22,21 +32,30 @@ type Stringer func(
 
 // Game ...
 type Game struct {
-	game     GameModel
-	stringer Stringer
-	writer   io.Writer
+	game        GameModel
+	stringer    Stringer
+	reader      *bufio.Reader
+	writer      io.Writer
+	humanPrompt string
+	exitCommand string
 }
 
 // NewGame ...
 func NewGame(
 	game GameModel,
 	stringer Stringer,
+	reader io.Reader,
 	writer io.Writer,
+	humanPrompt string,
+	exitCommand string,
 ) Game {
 	return Game{
-		game:     game,
-		stringer: stringer,
-		writer:   writer,
+		game:        game,
+		stringer:    stringer,
+		reader:      bufio.NewReader(reader),
+		writer:      writer,
+		humanPrompt: humanPrompt,
+		exitCommand: exitCommand,
 	}
 }
 
@@ -47,7 +66,8 @@ func (game Game) WritePrompt(
 	text := game.stringer(game.game.Storage())
 	text += "\n"
 
-	_, err := io.WriteString(game.writer, text)
+	_, err :=
+		io.WriteString(game.writer, text)
 	if err != nil {
 		const message = "unable to write " +
 			"the storage: %s"
@@ -61,11 +81,57 @@ func (game Game) WritePrompt(
 		return state // don't wrap
 	}
 
+	prompt += " "
+
 	_, err =
 		io.WriteString(game.writer, prompt)
 	if err != nil {
 		const message = "unable to write " +
 			"the prompt message: %s"
+		return fmt.Errorf(message, err)
+	}
+
+	return nil
+}
+
+// ReadMove ...
+func (game Game) ReadMove() error {
+	err := game.WritePrompt(game.humanPrompt)
+	switch err {
+	case nil:
+	case games.ErrCheckmate, games.ErrDraw:
+		return err // don't wrap
+	default:
+		const message = "unable to write " +
+			"the prompt: %s"
+		return fmt.Errorf(message, err)
+	}
+
+	command, err :=
+		game.reader.ReadString('\n')
+	if err != nil && err != io.EOF {
+		const message = "unable to read " +
+			"the command: %s"
+		return fmt.Errorf(message, err)
+	}
+
+	command = strings.TrimSpace(command)
+	command = strings.ToLower(command)
+	if command == game.exitCommand {
+		return ErrExit // don't wrap
+	}
+
+	move, err := uci.DecodeMove(command)
+	if err != nil {
+		const message = "unable to decode " +
+			"the move: %s"
+		return fmt.Errorf(message, err)
+	}
+
+	err = game.game.ApplyMove(move)
+	if err != nil {
+		const message = "unable to apply " +
+			"the move: %s"
 		return fmt.Errorf(message, err)
 	}
 
