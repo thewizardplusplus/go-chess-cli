@@ -36,7 +36,6 @@ type Game struct {
 	stringer    Stringer
 	reader      *bufio.Reader
 	writer      io.Writer
-	humanPrompt string
 	exitCommand string
 }
 
@@ -46,7 +45,6 @@ func NewGame(
 	stringer Stringer,
 	reader io.Reader,
 	writer io.Writer,
-	humanPrompt string,
 	exitCommand string,
 ) Game {
 	return Game{
@@ -54,7 +52,6 @@ func NewGame(
 		stringer:    stringer,
 		reader:      bufio.NewReader(reader),
 		writer:      writer,
-		humanPrompt: humanPrompt,
 		exitCommand: exitCommand,
 	}
 }
@@ -95,8 +92,10 @@ func (game Game) WritePrompt(
 }
 
 // ReadMove ...
-func (game Game) ReadMove() error {
-	err := game.WritePrompt(game.humanPrompt)
+func (game Game) ReadMove(
+	prompt string,
+) error {
+	err := game.WritePrompt(prompt)
 	switch err {
 	case nil:
 	case games.ErrCheckmate, games.ErrDraw:
@@ -134,6 +133,27 @@ func (game Game) ReadMove() error {
 			"the move: %s"
 		return fmt.Errorf(message, err)
 	}
+
+	return nil
+}
+
+// SearchMove ...
+func (game Game) SearchMove(
+	prompt string,
+) error {
+	err := game.WritePrompt(prompt)
+	switch err {
+	case nil:
+	case games.ErrCheckmate, games.ErrDraw:
+		return err // don't wrap
+	default:
+		const message = "unable to write " +
+			"the prompt: %s"
+		return fmt.Errorf(message, err)
+	}
+
+	move := game.game.SearchMove()
+	fmt.Println(uci.EncodeMove(move))
 
 	return nil
 }

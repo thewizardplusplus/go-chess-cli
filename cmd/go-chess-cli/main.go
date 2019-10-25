@@ -98,13 +98,6 @@ func newGameModel(
 	)
 }
 
-func printPrompt(
-	side string,
-	separator rune,
-) {
-	fmt.Printf("%s%c ", side, separator)
-}
-
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -181,7 +174,6 @@ func main() {
 		encoder.Encode,
 		os.Stdin,
 		os.Stdout,
-		"human>",
 		"exit",
 	)
 	firstMove := true
@@ -189,7 +181,7 @@ loop:
 	for {
 		if !firstMove ||
 			searcherColor == models.Black {
-			err := game.ReadMove()
+			err := game.ReadMove("human>")
 			switch err {
 			case nil:
 			case cli.ErrExit:
@@ -206,16 +198,6 @@ loop:
 			}
 		}
 
-		err := game.WritePrompt("ai: ")
-		switch err {
-		case nil:
-		case games.ErrCheckmate,
-			games.ErrDraw:
-			fmt.Println("game in state: ", err)
-		default:
-			log.Fatal(err)
-		}
-
 		searcher.SetTerminator(
 			terminators.NewTimeTerminator(
 				time.Now,
@@ -223,8 +205,21 @@ loop:
 			),
 		)
 
-		move := gameModel.SearchMove()
-		fmt.Println(uci.EncodeMove(move))
+		err := game.SearchMove("ai:")
+		switch err {
+		case nil:
+		case cli.ErrExit:
+			break loop
+		case games.ErrCheckmate,
+			games.ErrDraw:
+			const message = "game in state: " +
+				"%s\n"
+			fmt.Printf(message, err)
+			break loop
+		default:
+			fmt.Printf("error: %s\n", err)
+			continue loop
+		}
 
 		firstMove = false
 	}
