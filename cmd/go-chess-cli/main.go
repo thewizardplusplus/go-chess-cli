@@ -23,6 +23,21 @@ import (
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
+type side int
+
+const (
+	human side = iota
+	searcher
+)
+
+func (side side) invert() side {
+	if side == human {
+		return searcher
+	}
+
+	return human
+}
+
 func decodeColor(text string) (
 	models.Color,
 	error,
@@ -294,12 +309,13 @@ func main() {
 		)
 	}
 
-	var side string
+	var side side
+	// detect an initial side
 	switch parsedColor {
 	case models.Black:
-		side = "searcher"
+		side = searcher
 	case models.White:
-		side = "human"
+		side = human
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -314,19 +330,23 @@ loop:
 		var move models.Move
 		var err error
 		switch side {
-		case "human":
+		case human:
 			move, err = readMove(
 				reader,
 				storage,
 				parsedColor,
 			)
-		case "searcher":
+		case searcher:
 			move, err = searchMove(
 				cache,
 				storage,
 				parsedColor.Negative(),
 				*duration,
 			)
+			if err == nil {
+				text := uci.EncodeMove(move)
+				fmt.Println(text)
+			}
 		}
 		switch err {
 		case nil:
@@ -343,14 +363,6 @@ loop:
 		}
 
 		storage = storage.ApplyMove(move)
-		switch side {
-		case "human":
-			side = "searcher"
-		case "searcher":
-			text := uci.EncodeMove(move)
-			fmt.Println(text)
-
-			side = "human"
-		}
+		side = side.invert()
 	}
 }
