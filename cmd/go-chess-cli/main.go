@@ -23,6 +23,37 @@ import (
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
+func decodeColor(text string) (
+	models.Color,
+	error,
+) {
+	var color models.Color
+	switch text {
+	case "black":
+		color = models.Black
+	case "white":
+		color = models.White
+	default:
+		return 0, errors.New("incorrect color")
+	}
+
+	return color, nil
+}
+
+func encodeColor(
+	color models.Color,
+) string {
+	var text string
+	switch color {
+	case models.Black:
+		text = "black"
+	case models.White:
+		text = "white"
+	}
+
+	return text
+}
+
 func encodeStorage(
 	storage models.PieceStorage,
 ) string {
@@ -133,12 +164,7 @@ func writePrompt(
 		return err // don't wrap
 	}
 
-	switch color {
-	case models.Black:
-		text = "black"
-	case models.White:
-		text = "white"
-	}
+	text = encodeColor(color)
 	fmt.Print(text + "> ")
 
 	return nil
@@ -260,17 +286,20 @@ func main() {
 		)
 	}
 
-	var parsedColor models.Color
+	parsedColor, err := decodeColor(*color)
+	if err != nil {
+		log.Fatal(
+			"unable to decode the color: ",
+			err,
+		)
+	}
+
 	var side string
-	switch *color {
-	case "black":
-		parsedColor = models.Black
+	switch parsedColor {
+	case models.Black:
 		side = "searcher"
-	case "white":
-		parsedColor = models.White
+	case models.White:
 		side = "human"
-	default:
-		log.Fatal("incorrect color")
 	}
 
 	reader := bufio.NewReader(os.Stdin)
