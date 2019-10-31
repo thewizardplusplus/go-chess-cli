@@ -1,75 +1,92 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
-	"math/rand"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
-	cli "github.com/thewizardplusplus/go-chess-cli"
 	minimax "github.com/thewizardplusplus/go-chess-minimax"
 	"github.com/thewizardplusplus/go-chess-minimax/caches"
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
+	moves "github.com/thewizardplusplus/go-chess-minimax/models"
 	"github.com/thewizardplusplus/go-chess-minimax/terminators"
 	models "github.com/thewizardplusplus/go-chess-models"
 	"github.com/thewizardplusplus/go-chess-models/encoding/uci"
-	"github.com/thewizardplusplus/go-chess-models/games"
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
-var (
-	generator models.MoveGenerator
-	evaluator evaluators.MaterialEvaluator
-)
+func encodeStorage(
+	storage models.PieceStorage,
+) string {
+	var ranks []string
+	var currentRank string
+	positions := storage.Size().Positions()
+	for _, position := range positions {
+		if len(currentRank) == 0 {
+			currentRank +=
+				strconv.Itoa(position.Rank + 1)
+		}
 
-func newChecker() minimax.MoveSearcher {
-	// limit to the minimum value
-	// at which all checks are performed
-	terminator :=
-		terminators.NewDeepTerminator(1)
+		piece, ok := storage.Piece(position)
+		if ok {
+			currentRank += uci.EncodePiece(piece)
+		} else {
+			currentRank += "x"
+		}
 
-	return minimax.NewAlphaBetaSearcher(
-		generator,
-		terminator,
-		evaluator,
-	)
+		lastFile := storage.Size().Height - 1
+		if position.File == lastFile {
+			ranks = append(ranks, currentRank)
+			currentRank = ""
+		}
+	}
+
+	legendRank := " "
+	width := storage.Size().Width
+	for i := 0; i < width; i++ {
+		legendRank += string(i + 97)
+	}
+	ranks = append(ranks, legendRank)
+
+	return strings.Join(ranks, "\n")
 }
 
-func newSearcher(
-	maxCacheSize int,
-) minimax.MoveSearcher {
-	cache := caches.NewParallelCache(
-		caches.NewStringHashingCache(
-			maxCacheSize,
-			uci.EncodePieceStorage,
-		),
-	)
-
-	return minimax.NewParallelSearcher(
-		// terminator will be set
-		// before each search
-		nil,
+func search(
+	cache caches.Cache,
+	storage models.PieceStorage,
+	color models.Color,
+	terminator terminators.SearchTerminator,
+) (moves.ScoredMove, error) {
+	searcher := minimax.NewParallelSearcher(
+		terminator,
 		runtime.NumCPU(),
 		func() minimax.MoveSearcher {
 			innerSearcher :=
 				minimax.NewAlphaBetaSearcher(
-					generator,
+					models.MoveGenerator{},
 					// terminator will be set
 					// automatically
 					// by the iterative searcher
 					nil,
-					evaluator,
+					evaluators.MaterialEvaluator{},
 				)
 
-			// make and bind a cached searcher
-			// to inner one
-			minimax.NewCachedSearcher(
-				innerSearcher,
-				cache,
-			)
+			if cache != nil {
+				// make and bind a cached searcher
+				// to inner one
+				minimax.NewCachedSearcher(
+					innerSearcher,
+					cache,
+				)
+			}
 
 			return minimax.NewIterativeSearcher(
 				innerSearcher,
@@ -80,147 +97,231 @@ func newSearcher(
 			)
 		},
 	)
+
+	return searcher.SearchMove(
+		storage,
+		color,
+		0, // initial deep
+		moves.NewBounds(),
+	)
 }
 
-func newGameModel(
+func check(
 	storage models.PieceStorage,
-	searcher minimax.MoveSearcher,
-	searcherColor models.Color,
-) (games.Manual, error) {
-	checker := newChecker()
-
-	return games.NewManual(
+	color models.Color,
+) error {
+	terminator :=
+		terminators.NewDeepTerminator(1)
+	_, err := search(
+		nil, // without a cache
 		storage,
-		minimax.SearcherAdapter{checker},
-		minimax.SearcherAdapter{searcher},
-		searcherColor,
-		models.White,
+		color,
+		terminator,
 	)
+	return err // don't wrap
+}
+
+func writePrompt(
+	storage models.PieceStorage,
+	color models.Color,
+) error {
+	text := encodeStorage(storage)
+	fmt.Println(text)
+
+	err := check(storage, color)
+	if err != nil {
+		return err // don't wrap
+	}
+
+	switch color {
+	case models.Black:
+		text = "black"
+	case models.White:
+		text = "white"
+	}
+	fmt.Print(text + "> ")
+
+	return nil
+}
+
+func readMove(
+	reader *bufio.Reader,
+	storage models.PieceStorage,
+	color models.Color,
+) (models.Move, error) {
+	err := writePrompt(storage, color)
+	if err != nil {
+		return models.Move{}, err // don't wrap
+	}
+
+	text, err := reader.ReadString('\n')
+	if err != nil && err != io.EOF {
+		return models.Move{}, fmt.Errorf(
+			"unable to read the move: %s",
+			err,
+		)
+	}
+
+	text = strings.TrimSuffix(text, "\n")
+	move, err := uci.DecodeMove(text)
+	if err != nil {
+		return models.Move{}, fmt.Errorf(
+			"unable to decode the move: %s",
+			err,
+		)
+	}
+
+	err = storage.CheckMove(move)
+	if err != nil {
+		return models.Move{}, fmt.Errorf(
+			"incorrect move: %s",
+			err,
+		)
+	}
+
+	piece, _ := storage.Piece(move.Start)
+	if piece.Color() != color {
+		return models.Move{}, errors.New(
+			"incorrect move: opponent piece",
+		)
+	}
+
+	nextStorage := storage.ApplyMove(move)
+	nextColor := color.Negative()
+	err = check(nextStorage, nextColor)
+	if err == models.ErrKingCapture {
+		return models.Move{}, errors.New(
+			"incorrect move: check",
+		)
+	}
+
+	return move, nil
+}
+
+func searchMove(
+	cache caches.Cache,
+	storage models.PieceStorage,
+	color models.Color,
+	duration time.Duration,
+) (models.Move, error) {
+	err := writePrompt(storage, color)
+	if err != nil {
+		return models.Move{}, err // don't wrap
+	}
+
+	terminator :=
+		terminators.NewTimeTerminator(
+			time.Now,
+			duration,
+		)
+	move, _ := search(
+		cache,
+		storage,
+		color,
+		terminator,
+	)
+	return move.Move, nil
 }
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
-	boardInFEN := flag.String(
+	fen := flag.String(
 		"fen",
-		//"rnbqk/ppppp/5/PPPPP/RNBQK",
-		"rnbqkbnr/pppppppp/8/8"+
-			"/8/8/PPPPPPPP/RNBQKBNR",
+		"rnbqk/ppppp/5/PPPPP/RNBQK",
+		// "rnbqkbnr/pppppppp/8/8"+
+		// "/8/8/PPPPPPPP/RNBQKBNR",
 		"board in FEN",
 	)
-	humanColor := flag.String(
+	color := flag.String(
 		"color",
-		"random",
-		"human color "+
-			"(allowed: black, white, random)",
+		"white",
+		"human color (allowed: black, white)",
 	)
-	maxDuration := flag.Duration(
+	duration := flag.Duration(
 		"duration",
 		5*time.Second,
-		"maximal duration",
+		"search duration",
 	)
-	maxCacheSize := flag.Int(
-		"cache",
+	cacheSize := flag.Int(
+		"cacheSize",
 		1e6,
 		"maximal cache size",
 	)
 	flag.Parse()
 
 	storage, err := uci.DecodePieceStorage(
-		*boardInFEN,
+		*fen,
 		pieces.NewPiece,
 		models.NewBoard,
 	)
 	if err != nil {
 		log.Fatal(
-			"unable to decode a board: ",
+			"unable to decode the board: ",
 			err,
 		)
 	}
 
-	var searcherColor models.Color
-	switch *humanColor {
+	var parsedColor models.Color
+	var side string
+	switch *color {
 	case "black":
-		searcherColor = models.White
+		parsedColor = models.Black
+		side = "searcher"
 	case "white":
-		searcherColor = models.Black
-	case "random":
-		searcherColor =
-			models.Color(rand.Intn(2))
+		parsedColor = models.White
+		side = "human"
 	default:
-		log.Fatal("incorrect human color")
+		log.Fatal("incorrect color")
 	}
 
-	searcher := newSearcher(*maxCacheSize)
-	gameModel, err := newGameModel(
-		storage,
-		searcher,
-		searcherColor,
+	reader := bufio.NewReader(os.Stdin)
+	cache := caches.NewParallelCache(
+		caches.NewStringHashingCache(
+			*cacheSize,
+			uci.EncodePieceStorage,
+		),
 	)
-	if err != nil {
-		log.Fatal(
-			"unable to start a game: ",
-			err,
-		)
-	}
-
-	encoder := cli.NewPieceStorageEncoder(
-		uci.EncodePiece,
-		"x",
-		searcherColor,
-	)
-	game := cli.NewGame(
-		gameModel,
-		encoder.Encode,
-		os.Stdin,
-		os.Stdout,
-		"exit",
-	)
-	firstMove := true
 loop:
 	for {
-		if !firstMove ||
-			searcherColor == models.Black {
-			err := game.ReadMove("human>")
-			switch err {
-			case nil:
-			case cli.ErrExit:
-				break loop
-			case games.ErrCheckmate,
-				games.ErrDraw:
-				const message = "game in state: " +
-					"%s\n"
-				fmt.Printf(message, err)
-				break loop
-			default:
-				fmt.Printf("error: %s\n", err)
-				continue loop
-			}
+		var move models.Move
+		var err error
+		switch side {
+		case "human":
+			move, err = readMove(
+				reader,
+				storage,
+				parsedColor,
+			)
+		case "searcher":
+			move, err = searchMove(
+				cache,
+				storage,
+				parsedColor.Negative(),
+				*duration,
+			)
 		}
-
-		searcher.SetTerminator(
-			terminators.NewTimeTerminator(
-				time.Now,
-				*maxDuration,
-			),
-		)
-
-		err := game.SearchMove("ai:")
 		switch err {
 		case nil:
-		case cli.ErrExit:
-			break loop
-		case games.ErrCheckmate,
-			games.ErrDraw:
-			const message = "game in state: " +
-				"%s\n"
-			fmt.Printf(message, err)
+		case minimax.ErrCheckmate,
+			minimax.ErrDraw:
+			fmt.Printf(
+				"game in state: %s\n",
+				err,
+			)
 			break loop
 		default:
 			fmt.Printf("error: %s\n", err)
 			continue loop
 		}
 
-		firstMove = false
+		storage = storage.ApplyMove(move)
+		switch side {
+		case "human":
+			side = "searcher"
+		case "searcher":
+			text := uci.EncodeMove(move)
+			fmt.Println(text)
+
+			side = "human"
+		}
 	}
 }
