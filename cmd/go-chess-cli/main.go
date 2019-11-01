@@ -85,7 +85,7 @@ func encodeStorage(
 		if ok {
 			currentRank += uci.EncodePiece(piece)
 		} else {
-			currentRank += "x"
+			currentRank += "+"
 		}
 
 		lastFile := storage.Size().Height - 1
@@ -269,7 +269,9 @@ func main() {
 		"fen",
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
 		// "rnbqkbnr/pppppppp/8/8"+
-		// "/8/8/PPPPPPPP/RNBQKBNR",
+		//   "/8/8/PPPPPPPP/RNBQKBNR",
+		// "r3k2r/p1ppqpb1/bn2pnp1/3PN3"+
+		//   "/1p2P3/2N2Q1p/PPPBBPPP/R3K2R",
 		"board in FEN",
 	)
 	color := flag.String(
