@@ -156,6 +156,8 @@ func check(
 	storage models.PieceStorage,
 	color models.Color,
 ) error {
+	// minimal deep, at which a game state
+	// will be detected
 	terminator :=
 		terminators.NewDeepTerminator(1)
 	_, err := search(
@@ -268,10 +270,6 @@ func main() {
 	fen := flag.String(
 		"fen",
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
-		// "rnbqkbnr/pppppppp/8/8"+
-		//   "/8/8/PPPPPPPP/RNBQKBNR",
-		// "r3k2r/p1ppqpb1/bn2pnp1/3PN3"+
-		//   "/1p2P3/2N2Q1p/PPPBBPPP/R3K2R",
 		"board in FEN",
 	)
 	color := flag.String(
@@ -354,13 +352,10 @@ loop:
 		case nil:
 		case minimax.ErrCheckmate,
 			minimax.ErrDraw:
-			fmt.Printf(
-				"game in state: %s\n",
-				err,
-			)
+			fmt.Println("game in state: ", err)
 			break loop
 		default:
-			fmt.Printf("error: %s\n", err)
+			log.Print("error: ", err)
 			continue loop
 		}
 
