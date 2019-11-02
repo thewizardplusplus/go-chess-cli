@@ -26,16 +26,16 @@ import (
 type side int
 
 const (
-	human side = iota
-	searcher
+	searcher side = iota
+	human
 )
 
 func (side side) invert() side {
-	if side == human {
-		return searcher
+	if side == searcher {
+		return human
 	}
 
-	return human
+	return searcher
 }
 
 func decodeColor(text string) (
@@ -85,7 +85,7 @@ func encodeStorage(
 		if ok {
 			currentRank += uci.EncodePiece(piece)
 		} else {
-			currentRank += "+"
+			currentRank += "."
 		}
 
 		lastFile := storage.Size().Height - 1
@@ -182,6 +182,7 @@ func writePrompt(
 	}
 
 	text = encodeColor(color)
+	// don't break the line
 	fmt.Print(text + "> ")
 
 	return nil
@@ -270,7 +271,8 @@ func main() {
 	fen := flag.String(
 		"fen",
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
-		"board in FEN",
+		"board in FEN "+
+			"(default: Gardner's minichess)",
 	)
 	color := flag.String(
 		"color",
@@ -280,12 +282,12 @@ func main() {
 	duration := flag.Duration(
 		"duration",
 		5*time.Second,
-		"search duration",
+		"search duration (e.g. 72h3m0.5s)",
 	)
 	cacheSize := flag.Int(
 		"cacheSize",
 		1e6,
-		"maximal cache size",
+		"maximal cache size (in items)",
 	)
 	flag.Parse()
 
@@ -352,7 +354,7 @@ loop:
 		case nil:
 		case minimax.ErrCheckmate,
 			minimax.ErrDraw:
-			fmt.Println("game in state: ", err)
+			log.Print("game in the state: ", err)
 			break loop
 		default:
 			log.Print("error: ", err)
