@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,42 +36,6 @@ func (side side) invert() side {
 	}
 
 	return searcher
-}
-
-func encodeStorage(
-	storage models.PieceStorage,
-) string {
-	var ranks []string
-	var currentRank string
-	positions := storage.Size().Positions()
-	for _, position := range positions {
-		if len(currentRank) == 0 {
-			currentRank +=
-				strconv.Itoa(position.Rank + 1)
-		}
-
-		piece, ok := storage.Piece(position)
-		if ok {
-			currentRank += uci.EncodePiece(piece)
-		} else {
-			currentRank += "."
-		}
-
-		lastFile := storage.Size().Height - 1
-		if position.File == lastFile {
-			ranks = append(ranks, currentRank)
-			currentRank = ""
-		}
-	}
-
-	legendRank := " "
-	width := storage.Size().Width
-	for i := 0; i < width; i++ {
-		legendRank += string(i + 97)
-	}
-	ranks = append(ranks, legendRank)
-
-	return strings.Join(ranks, "\n")
 }
 
 func search(
@@ -143,7 +106,12 @@ func writePrompt(
 	storage models.PieceStorage,
 	color models.Color,
 ) error {
-	text := encodeStorage(storage)
+	encoder := ascii.NewPieceStorageEncoder(
+		uci.EncodePiece,
+		".",
+		models.White,
+	)
+	text := encoder.Encode(storage)
 	fmt.Println(text)
 
 	err := check(storage, color)
