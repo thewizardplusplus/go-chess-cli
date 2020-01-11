@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thewizardplusplus/go-chess-cli/encoding/ascii"
 	minimax "github.com/thewizardplusplus/go-chess-minimax"
 	"github.com/thewizardplusplus/go-chess-minimax/caches"
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
@@ -36,37 +37,6 @@ func (side side) invert() side {
 	}
 
 	return searcher
-}
-
-func decodeColor(text string) (
-	models.Color,
-	error,
-) {
-	var color models.Color
-	switch text {
-	case "black":
-		color = models.Black
-	case "white":
-		color = models.White
-	default:
-		return 0, errors.New("incorrect color")
-	}
-
-	return color, nil
-}
-
-func encodeColor(
-	color models.Color,
-) string {
-	var text string
-	switch color {
-	case models.Black:
-		text = "black"
-	case models.White:
-		text = "white"
-	}
-
-	return text
 }
 
 func encodeStorage(
@@ -181,7 +151,7 @@ func writePrompt(
 		return err // don't wrap
 	}
 
-	text = encodeColor(color)
+	text = ascii.EncodeColor(color)
 	// don't break the line
 	fmt.Print(text + "> ")
 
@@ -303,7 +273,8 @@ func main() {
 		)
 	}
 
-	parsedColor, err := decodeColor(*color)
+	parsedColor, err :=
+		ascii.DecodeColor(*color)
 	if err != nil {
 		log.Fatal(
 			"unable to decode the color: ",
