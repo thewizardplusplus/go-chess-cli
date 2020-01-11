@@ -42,7 +42,7 @@ func TestNewPieceStorageEncoder(
 	}
 }
 
-func TestPieceStorageEncoderEncode(
+func TestPieceStorageEncoderEncodePieceStorage(
 	test *testing.T,
 ) {
 	type fields struct {
@@ -114,7 +114,8 @@ func TestPieceStorageEncoderEncode(
 			placeholder: data.fields.placeholder,
 			topColor:    data.fields.topColor,
 		}
-		got := encoder.Encode(storage)
+		got :=
+			encoder.EncodePieceStorage(storage)
 
 		if got != data.want {
 			test.Fail()

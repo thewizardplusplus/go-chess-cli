@@ -111,7 +111,8 @@ func writePrompt(
 		".",
 		models.White,
 	)
-	text := encoder.Encode(storage)
+	text :=
+		encoder.EncodePieceStorage(storage)
 	fmt.Println(text)
 
 	err := check(storage, color)

@@ -32,8 +32,10 @@ func NewPieceStorageEncoder(
 	}
 }
 
-// Encode ...
-func (encoder PieceStorageEncoder) Encode(
+// EncodePieceStorage ...
+func (
+	encoder PieceStorageEncoder,
+) EncodePieceStorage(
 	storage models.PieceStorage,
 ) string {
 	var ranks []string
