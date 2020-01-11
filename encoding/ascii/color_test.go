@@ -45,3 +45,30 @@ func TestDecodeColor(test *testing.T) {
 		}
 	}
 }
+
+func TestEncodeColor(test *testing.T) {
+	type args struct {
+		color models.Color
+	}
+	type data struct {
+		args args
+		want string
+	}
+
+	for _, data := range []data{
+		data{
+			args: args{models.Black},
+			want: "black",
+		},
+		data{
+			args: args{models.White},
+			want: "white",
+		},
+	} {
+		got := EncodeColor(data.args.color)
+
+		if got != data.want {
+			test.Fail()
+		}
+	}
+}
