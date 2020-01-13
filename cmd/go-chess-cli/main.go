@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/thewizardplusplus/go-chess-cli/encoding/ascii"
+	"github.com/thewizardplusplus/go-chess-cli/encoding/unicode"
 	minimax "github.com/thewizardplusplus/go-chess-minimax"
 	"github.com/thewizardplusplus/go-chess-minimax/caches"
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
@@ -238,6 +239,11 @@ func main() {
 		1e6,
 		"maximal cache size (in items)",
 	)
+	useUnicode := flag.Bool(
+		"unicode",
+		true,
+		"use Unicode to display pieces",
+	)
 	flag.Parse()
 
 	storage, err := uci.DecodePieceStorage(
@@ -278,10 +284,17 @@ func main() {
 		side = human
 	}
 
+	var pieceEncoder ascii.PieceEncoder
+	if *useUnicode {
+		pieceEncoder = unicode.EncodePiece
+	} else {
+		pieceEncoder = uci.EncodePiece
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	storageEncoder :=
 		ascii.NewPieceStorageEncoder(
-			uci.EncodePiece,
+			pieceEncoder,
 			".",
 			parsedColor.Negative(),
 		)
