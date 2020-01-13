@@ -11,42 +11,42 @@ func EncodePiece(piece models.Piece) string {
 	case models.King:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265A"
+			text = "\u265a"
 		case models.White:
 			text = "\u2654"
 		}
 	case models.Queen:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265B"
+			text = "\u265b"
 		case models.White:
 			text = "\u2655"
 		}
 	case models.Rook:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265C"
+			text = "\u265c"
 		case models.White:
 			text = "\u2656"
 		}
 	case models.Bishop:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265D"
+			text = "\u265d"
 		case models.White:
 			text = "\u2657"
 		}
 	case models.Knight:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265E"
+			text = "\u265e"
 		case models.White:
 			text = "\u2658"
 		}
 	case models.Pawn:
 		switch piece.Color() {
 		case models.Black:
-			text = "\u265F"
+			text = "\u265f"
 		case models.White:
 			text = "\u2659"
 		}

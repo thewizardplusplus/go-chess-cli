@@ -285,17 +285,20 @@ func main() {
 	}
 
 	var pieceEncoder ascii.PieceEncoder
+	var placeholder string
 	if *useUnicode {
 		pieceEncoder = unicode.EncodePiece
+		placeholder = "\u00b7"
 	} else {
 		pieceEncoder = uci.EncodePiece
+		placeholder = "."
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 	storageEncoder :=
 		ascii.NewPieceStorageEncoder(
 			pieceEncoder,
-			".",
+			placeholder,
 			parsedColor.Negative(),
 		)
 	cache := caches.NewParallelCache(

@@ -68,7 +68,7 @@ func TestEncodePiece(test *testing.T) {
 					color: models.Black,
 				},
 			},
-			want: "\u265B",
+			want: "\u265b",
 		},
 	} {
 		got := EncodePiece(data.args.piece)
