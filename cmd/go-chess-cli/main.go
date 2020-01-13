@@ -103,16 +103,12 @@ func check(
 }
 
 func writePrompt(
+	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
 ) error {
-	encoder := ascii.NewPieceStorageEncoder(
-		uci.EncodePiece,
-		".",
-		models.White,
-	)
-	text :=
-		encoder.EncodePieceStorage(storage)
+	text := storageEncoder.
+		EncodePieceStorage(storage)
 	fmt.Println(text)
 
 	err := check(storage, color)
@@ -129,10 +125,15 @@ func writePrompt(
 
 func readMove(
 	reader *bufio.Reader,
+	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
 ) (models.Move, error) {
-	err := writePrompt(storage, color)
+	err := writePrompt(
+		storageEncoder,
+		storage,
+		color,
+	)
 	if err != nil {
 		return models.Move{}, err // don't wrap
 	}
@@ -183,11 +184,16 @@ func readMove(
 
 func searchMove(
 	cache caches.Cache,
+	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
 	duration time.Duration,
 ) (models.Move, error) {
-	err := writePrompt(storage, color)
+	err := writePrompt(
+		storageEncoder,
+		storage,
+		color,
+	)
 	if err != nil {
 		return models.Move{}, err // don't wrap
 	}
@@ -261,6 +267,12 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
+	storageEncoder :=
+		ascii.NewPieceStorageEncoder(
+			uci.EncodePiece,
+			".",
+			parsedColor.Negative(),
+		)
 	cache := caches.NewParallelCache(
 		caches.NewStringHashingCache(
 			*cacheSize,
@@ -275,12 +287,14 @@ loop:
 		case human:
 			move, err = readMove(
 				reader,
+				storageEncoder,
 				storage,
 				parsedColor,
 			)
 		case searcher:
 			move, err = searchMove(
 				cache,
+				storageEncoder,
 				storage,
 				parsedColor.Negative(),
 				*duration,
