@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 	"strings"
@@ -213,6 +214,8 @@ func searchMove(
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	fen := flag.String(
 		"fen",
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
@@ -221,8 +224,9 @@ func main() {
 	)
 	color := flag.String(
 		"color",
-		"white",
-		"human color (allowed: black, white)",
+		"random",
+		"human color "+
+			"(allowed: random, black, white)",
 	)
 	duration := flag.Duration(
 		"duration",
@@ -250,7 +254,15 @@ func main() {
 
 	parsedColor, err :=
 		ascii.DecodeColor(*color)
-	if err != nil {
+	switch {
+	case err == nil:
+	case *color == "random":
+		if rand.Intn(2) == 0 {
+			parsedColor = models.Black
+		} else {
+			parsedColor = models.White
+		}
+	default:
 		log.Fatal(
 			"unable to decode the color: ",
 			err,
