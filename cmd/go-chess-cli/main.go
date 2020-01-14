@@ -108,6 +108,7 @@ func writePrompt(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
+	side side,
 ) error {
 	text := storageEncoder.
 		EncodePieceStorage(storage)
@@ -118,9 +119,14 @@ func writePrompt(
 		return err // don't wrap
 	}
 
+	var mark string
+	if side == searcher {
+		mark = "(searching) "
+	}
+
 	text = ascii.EncodeColor(color)
 	// don't break the line
-	fmt.Print(text + "> ")
+	fmt.Printf("%s> %s", text, mark)
 
 	return nil
 }
@@ -130,11 +136,13 @@ func readMove(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
+	side side,
 ) (models.Move, error) {
 	err := writePrompt(
 		storageEncoder,
 		storage,
 		color,
+		side,
 	)
 	if err != nil {
 		return models.Move{}, err // don't wrap
@@ -189,12 +197,14 @@ func searchMove(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
+	side side,
 	duration time.Duration,
 ) (models.Move, error) {
 	err := writePrompt(
 		storageEncoder,
 		storage,
 		color,
+		side,
 	)
 	if err != nil {
 		return models.Move{}, err // don't wrap
@@ -318,6 +328,7 @@ loop:
 				storageEncoder,
 				storage,
 				parsedColor,
+				side,
 			)
 		case searcher:
 			move, err = searchMove(
@@ -325,6 +336,7 @@ loop:
 				storageEncoder,
 				storage,
 				parsedColor.Negative(),
+				side,
 				*duration,
 			)
 			if err == nil {
