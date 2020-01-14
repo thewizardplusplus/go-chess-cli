@@ -50,12 +50,18 @@ func (
 				strconv.Itoa(position.Rank + 1)
 		}
 
+		currentRank +=
+			spaces(encoder.margins.Piece.Left)
+
 		piece, ok := storage.Piece(position)
 		if ok {
 			currentRank += encoder.encoder(piece)
 		} else {
 			currentRank += encoder.placeholder
 		}
+
+		currentRank +=
+			spaces(encoder.margins.Piece.Right)
 
 		lastFile := storage.Size().Height - 1
 		if position.File == lastFile {
@@ -67,14 +73,41 @@ func (
 		reverse(ranks)
 	}
 
+	var sparseRanks []string
+	for _, rank := range ranks {
+		sparseRanks = append(
+			sparseRanks,
+			empties(encoder.margins.Piece.Top)...,
+		)
+		sparseRanks = append(sparseRanks, rank)
+		sparseRanks = append(
+			sparseRanks,
+			empties(
+				encoder.margins.Piece.Bottom,
+			)...,
+		)
+	}
+
 	legendRank := " "
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
-		legendRank += string(i + 97)
+		legendRank +=
+			spaces(encoder.margins.Piece.Left) +
+				string(i+97) +
+				spaces(encoder.margins.Piece.Right)
 	}
-	ranks = append(ranks, legendRank)
+	sparseRanks =
+		append(sparseRanks, legendRank)
 
-	return strings.Join(ranks, "\n")
+	return strings.Join(sparseRanks, "\n")
+}
+
+func spaces(length int) string {
+	return strings.Repeat(" ", length)
+}
+
+func empties(count int) []string {
+	return make([]string, count)
 }
 
 func reverse(strings []string) {

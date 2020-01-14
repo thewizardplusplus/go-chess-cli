@@ -95,6 +95,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
+				margins:     Margins{},
 				topColor:    models.Black,
 			},
 			args: args{
@@ -114,6 +115,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
+				margins:     Margins{},
 				topColor:    models.White,
 			},
 			args: args{
@@ -127,6 +129,135 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"6bnxxpnpx\n" +
 				"7pxppqpbx\n" +
 				"8rxxxkxxr\n" +
+				" abcdefgh",
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Piece: PieceMargins{
+						HorizontalMargins: HorizontalMargins{
+							Left:  1,
+							Right: 2,
+						},
+					},
+				},
+				topColor: models.Black,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "8 r   x   x   x   k   x   x   r  \n" +
+				"7 p   x   p   p   q   p   b   x  \n" +
+				"6 b   n   x   x   p   n   p   x  \n" +
+				"5 x   x   x   P   N   x   x   x  \n" +
+				"4 x   p   x   x   P   x   x   x  \n" +
+				"3 x   x   N   x   x   Q   x   p  \n" +
+				"2 P   P   P   B   B   P   P   P  \n" +
+				"1 R   x   x   x   K   x   x   R  \n" +
+				"  a   b   c   d   e   f   g   h  ",
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Piece: PieceMargins{
+						VerticalMargins: VerticalMargins{
+							Top:    1,
+							Bottom: 2,
+						},
+					},
+				},
+				topColor: models.Black,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "\n" +
+				"8rxxxkxxr\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"7pxppqpbx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"6bnxxpnpx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"5xxxPNxxx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"4xpxxPxxx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"3xxNxxQxp\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"2PPPBBPPP\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"1RxxxKxxR\n" +
+				"\n" +
+				"\n" +
+				" abcdefgh",
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Piece: PieceMargins{
+						VerticalMargins: VerticalMargins{
+							Top:    1,
+							Bottom: 2,
+						},
+					},
+				},
+				topColor: models.White,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "\n" +
+				"1RxxxKxxR\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"2PPPBBPPP\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"3xxNxxQxp\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"4xpxxPxxx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"5xxxPNxxx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"6bnxxpnpx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"7pxppqpbx\n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"8rxxxkxxr\n" +
+				"\n" +
+				"\n" +
 				" abcdefgh",
 		},
 	} {
@@ -150,6 +281,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			encoder.EncodePieceStorage(storage)
 
 		if got != data.want {
+			test.Log(got)
+			test.Log(data.want)
 			test.Fail()
 		}
 	}
