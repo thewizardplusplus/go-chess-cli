@@ -17,9 +17,11 @@ const (
 func TestNewPieceStorageEncoder(
 	test *testing.T,
 ) {
+	var margins Margins
 	encoder := NewPieceStorageEncoder(
 		uci.EncodePiece,
 		"x",
+		margins,
 		models.White,
 	)
 
@@ -37,6 +39,13 @@ func TestNewPieceStorageEncoder(
 		test.Fail()
 	}
 
+	if !reflect.DeepEqual(
+		encoder.margins,
+		margins,
+	) {
+		test.Fail()
+	}
+
 	if encoder.topColor != models.White {
 		test.Fail()
 	}
@@ -48,6 +57,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 	type fields struct {
 		encoder     PieceEncoder
 		placeholder string
+		margins     Margins
 		topColor    models.Color
 	}
 	type args struct {
@@ -112,6 +122,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 		encoder := PieceStorageEncoder{
 			encoder:     data.fields.encoder,
 			placeholder: data.fields.placeholder,
+			margins:     data.fields.margins,
 			topColor:    data.fields.topColor,
 		}
 		got :=

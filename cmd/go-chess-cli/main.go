@@ -314,6 +314,7 @@ func main() {
 		ascii.NewPieceStorageEncoder(
 			pieceEncoder,
 			placeholder,
+			ascii.Margins{},
 			parsedColor.Negative(),
 		)
 	cache := caches.NewParallelCache(

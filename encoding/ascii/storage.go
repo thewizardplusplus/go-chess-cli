@@ -16,6 +16,7 @@ type PieceEncoder func(
 type PieceStorageEncoder struct {
 	encoder     PieceEncoder
 	placeholder string
+	margins     Margins
 	topColor    models.Color
 }
 
@@ -23,11 +24,13 @@ type PieceStorageEncoder struct {
 func NewPieceStorageEncoder(
 	encoder PieceEncoder,
 	placeholder string,
+	margins Margins,
 	topColor models.Color,
 ) PieceStorageEncoder {
 	return PieceStorageEncoder{
 		encoder:     encoder,
 		placeholder: placeholder,
+		margins:     margins,
 		topColor:    topColor,
 	}
 }
