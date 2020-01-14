@@ -198,6 +198,7 @@ func searchMove(
 	storage models.PieceStorage,
 	color models.Color,
 	side side,
+	deep int,
 	duration time.Duration,
 ) (models.Move, error) {
 	err := writePrompt(
@@ -211,9 +212,12 @@ func searchMove(
 	}
 
 	terminator :=
-		terminators.NewTimeTerminator(
-			time.Now,
-			duration,
+		terminators.NewGroupTerminator(
+			terminators.NewDeepTerminator(deep),
+			terminators.NewTimeTerminator(
+				time.Now,
+				duration,
+			),
 		)
 	move, _ := search(
 		cache,
@@ -239,6 +243,7 @@ func main() {
 		"human color "+
 			"(allowed: random, black, white)",
 	)
+	deep := flag.Int("deep", 5, "search deep")
 	duration := flag.Duration(
 		"duration",
 		5*time.Second,
@@ -337,6 +342,7 @@ loop:
 				storage,
 				parsedColor.Negative(),
 				side,
+				*deep,
 				*duration,
 			)
 			if err == nil {
