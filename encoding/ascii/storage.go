@@ -46,8 +46,14 @@ func (
 	positions := storage.Size().Positions()
 	for _, position := range positions {
 		if len(currentRank) == 0 {
+			currentRank += spaces(
+				encoder.margins.Legend.Rank.Left,
+			)
 			currentRank +=
 				strconv.Itoa(position.Rank + 1)
+			currentRank += spaces(
+				encoder.margins.Legend.Rank.Right,
+			)
 		}
 
 		currentRank +=
@@ -88,7 +94,11 @@ func (
 		)
 	}
 
-	legendRank := " "
+	legendRank := spaces(
+		encoder.margins.Legend.Rank.Left +
+			encoder.margins.Legend.Rank.Right +
+			1,
+	)
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
 		legendRank +=

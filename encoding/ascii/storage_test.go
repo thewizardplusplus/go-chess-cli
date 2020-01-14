@@ -260,6 +260,33 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"\n" +
 				" abcdefgh",
 		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Legend: LegendMargins{
+						Rank: HorizontalMargins{
+							Left:  1,
+							Right: 2,
+						},
+					},
+				},
+				topColor: models.Black,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: " 8  rxxxkxxr\n" +
+				" 7  pxppqpbx\n" +
+				" 6  bnxxpnpx\n" +
+				" 5  xxxPNxxx\n" +
+				" 4  xpxxPxxx\n" +
+				" 3  xxNxxQxp\n" +
+				" 2  PPPBBPPP\n" +
+				" 1  RxxxKxxR\n" +
+				"    abcdefgh",
+		},
 	} {
 		storage, err := uci.DecodePieceStorage(
 			data.args.boardInFEN,
