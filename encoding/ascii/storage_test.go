@@ -17,7 +17,28 @@ const (
 func TestNewPieceStorageEncoder(
 	test *testing.T,
 ) {
-	var margins Margins
+	margins := Margins{
+		Piece: PieceMargins{
+			HorizontalMargins: HorizontalMargins{
+				Left:  1,
+				Right: 2,
+			},
+			VerticalMargins: VerticalMargins{
+				Top:    3,
+				Bottom: 4,
+			},
+		},
+		Legend: LegendMargins{
+			File: VerticalMargins{
+				Top:    5,
+				Bottom: 6,
+			},
+			Rank: HorizontalMargins{
+				Left:  7,
+				Right: 8,
+			},
+		},
+	}
 	encoder := NewPieceStorageEncoder(
 		uci.EncodePiece,
 		"x",
