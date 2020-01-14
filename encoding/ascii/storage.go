@@ -106,8 +106,18 @@ func (
 				string(i+97) +
 				spaces(encoder.margins.Piece.Right)
 	}
+
+	if encoder.margins.Legend.File.Bottom > 0 {
+		encoder.margins.Legend.File.Bottom++
+	}
+	sparseRanks = append(sparseRanks, empties(
+		encoder.margins.Legend.File.Top,
+	)...)
 	sparseRanks =
 		append(sparseRanks, legendRank)
+	sparseRanks = append(sparseRanks, empties(
+		encoder.margins.Legend.File.Bottom,
+	)...)
 
 	return strings.Join(sparseRanks, "\n")
 }
