@@ -46,28 +46,24 @@ func (
 	positions := storage.Size().Positions()
 	for _, position := range positions {
 		if len(currentRank) == 0 {
-			currentRank += spaces(
-				encoder.margins.Legend.Rank.Left,
-			)
-			currentRank +=
-				strconv.Itoa(position.Rank + 1)
-			currentRank += spaces(
-				encoder.margins.Legend.Rank.Right,
+			currentRank += wrapWithSpaces(
+				strconv.Itoa(position.Rank+1),
+				encoder.margins.Legend.Rank,
 			)
 		}
 
-		currentRank +=
-			spaces(encoder.margins.Piece.Left)
-
+		var encodedPiece string
 		piece, ok := storage.Piece(position)
 		if ok {
-			currentRank += encoder.encoder(piece)
+			encodedPiece = encoder.encoder(piece)
 		} else {
-			currentRank += encoder.placeholder
+			encodedPiece = encoder.placeholder
 		}
-
-		currentRank +=
-			spaces(encoder.margins.Piece.Right)
+		currentRank += wrapWithSpaces(
+			encodedPiece,
+			encoder.margins.
+				Piece.HorizontalMargins,
+		)
 
 		lastFile := storage.Size().Height - 1
 		if position.File == lastFile {
@@ -101,10 +97,11 @@ func (
 	)
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
-		legendRank +=
-			spaces(encoder.margins.Piece.Left) +
-				string(i+97) +
-				spaces(encoder.margins.Piece.Right)
+		legendRank += wrapWithSpaces(
+			string(i+97),
+			encoder.margins.
+				Piece.HorizontalMargins,
+		)
 	}
 
 	if encoder.margins.Legend.File.Bottom > 0 {
@@ -120,6 +117,15 @@ func (
 	)...)
 
 	return strings.Join(sparseRanks, "\n")
+}
+
+func wrapWithSpaces(
+	text string,
+	margins HorizontalMargins,
+) string {
+	return spaces(margins.Left) +
+		text +
+		spaces(margins.Right)
 }
 
 func spaces(length int) string {
