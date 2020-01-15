@@ -41,6 +41,9 @@ func (
 ) EncodePieceStorage(
 	storage models.PieceStorage,
 ) string {
+	pieceMargins := encoder.margins.Piece
+	legendMargins := encoder.margins.Legend
+
 	var ranks []string
 	var currentRank string
 	positions := storage.Size().Positions()
@@ -48,7 +51,7 @@ func (
 		if len(currentRank) == 0 {
 			currentRank += wrapWithSpaces(
 				strconv.Itoa(position.Rank+1),
-				encoder.margins.Legend.Rank,
+				legendMargins.Rank,
 			)
 		}
 
@@ -61,8 +64,7 @@ func (
 		}
 		currentRank += wrapWithSpaces(
 			encodedPiece,
-			encoder.margins.
-				Piece.HorizontalMargins,
+			pieceMargins.HorizontalMargins,
 		)
 
 		lastFile := storage.Size().Height - 1
@@ -81,34 +83,32 @@ func (
 			sparseRanks,
 			wrapWithEmptyLines(
 				rank,
-				encoder.margins.
-					Piece.VerticalMargins,
+				pieceMargins.VerticalMargins,
 			)...,
 		)
 	}
 
 	legendRank := spaces(
-		encoder.margins.Legend.Rank.Left +
-			encoder.margins.Legend.Rank.Right +
+		legendMargins.Rank.Left +
+			legendMargins.Rank.Right +
 			1,
 	)
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
 		legendRank += wrapWithSpaces(
 			string(i+97),
-			encoder.margins.
-				Piece.HorizontalMargins,
+			pieceMargins.HorizontalMargins,
 		)
 	}
 
-	if encoder.margins.Legend.File.Bottom > 0 {
-		encoder.margins.Legend.File.Bottom++
+	if legendMargins.File.Bottom > 0 {
+		legendMargins.File.Bottom++
 	}
 	sparseRanks = append(
 		sparseRanks,
 		wrapWithEmptyLines(
 			legendRank,
-			encoder.margins.Legend.File,
+			legendMargins.File,
 		)...,
 	)
 
