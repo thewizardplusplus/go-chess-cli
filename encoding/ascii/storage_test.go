@@ -314,7 +314,6 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"1RxxxKxxR\n" +
 				"\n" +
 				" abcdefgh\n" +
-				"\n" +
 				"\n",
 		},
 		data{
@@ -382,7 +381,6 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"\n" +
 				"\n" +
 				"     a   b   c   d   e   f   g   h  \n" +
-				"\n" +
 				"\n",
 		},
 	} {

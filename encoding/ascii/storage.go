@@ -100,10 +100,6 @@ func (
 			pieceMargins.HorizontalMargins,
 		)
 	}
-
-	if legendMargins.File.Bottom > 0 {
-		legendMargins.File.Bottom++
-	}
 	sparseRanks = append(
 		sparseRanks,
 		wrapWithEmptyLines(

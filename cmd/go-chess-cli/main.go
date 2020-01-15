@@ -25,6 +25,28 @@ import (
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
+var (
+	wideMargins = ascii.Margins{
+		Piece: ascii.PieceMargins{
+			HorizontalMargins: ascii.HorizontalMargins{
+				Left: 1,
+			},
+			VerticalMargins: ascii.VerticalMargins{
+				Top: 1,
+			},
+		},
+		Legend: ascii.LegendMargins{
+			File: ascii.VerticalMargins{
+				Top:    2,
+				Bottom: 1,
+			},
+			Rank: ascii.HorizontalMargins{
+				Right: 1,
+			},
+		},
+	}
+)
+
 type side int
 
 const (
@@ -259,6 +281,11 @@ func main() {
 		true,
 		"use Unicode to display pieces",
 	)
+	wide := flag.Bool(
+		"wide",
+		true,
+		"display the board wide",
+	)
 	flag.Parse()
 
 	storage, err := uci.DecodePieceStorage(
@@ -309,12 +336,17 @@ func main() {
 		placeholder = "."
 	}
 
+	var margins ascii.Margins
+	if *wide {
+		margins = wideMargins
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	storageEncoder :=
 		ascii.NewPieceStorageEncoder(
 			pieceEncoder,
 			placeholder,
-			ascii.Margins{},
+			margins,
 			parsedColor.Negative(),
 		)
 	cache := caches.NewParallelCache(
