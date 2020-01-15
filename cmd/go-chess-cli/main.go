@@ -15,6 +15,7 @@ import (
 
 	"github.com/thewizardplusplus/go-chess-cli/encoding/ascii"
 	"github.com/thewizardplusplus/go-chess-cli/encoding/unicode"
+	climodels "github.com/thewizardplusplus/go-chess-cli/models"
 	minimax "github.com/thewizardplusplus/go-chess-minimax"
 	"github.com/thewizardplusplus/go-chess-minimax/caches"
 	"github.com/thewizardplusplus/go-chess-minimax/evaluators"
@@ -46,21 +47,6 @@ var (
 		},
 	}
 )
-
-type side int
-
-const (
-	searcher side = iota
-	human
-)
-
-func (side side) invert() side {
-	if side == searcher {
-		return human
-	}
-
-	return searcher
-}
 
 func search(
 	cache caches.Cache,
@@ -130,7 +116,7 @@ func writePrompt(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
-	side side,
+	side climodels.Side,
 ) error {
 	text := storageEncoder.
 		EncodePieceStorage(storage)
@@ -142,7 +128,7 @@ func writePrompt(
 	}
 
 	var mark string
-	if side == searcher {
+	if side == climodels.Searcher {
 		mark = "(searching) "
 	}
 
@@ -158,7 +144,7 @@ func readMove(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
-	side side,
+	side climodels.Side,
 ) (models.Move, error) {
 	err := writePrompt(
 		storageEncoder,
@@ -219,7 +205,7 @@ func searchMove(
 	storageEncoder ascii.PieceStorageEncoder,
 	storage models.PieceStorage,
 	color models.Color,
-	side side,
+	side climodels.Side,
 	deep int,
 	duration time.Duration,
 ) (models.Move, error) {
@@ -317,15 +303,6 @@ func main() {
 		)
 	}
 
-	var side side
-	// detect an initial side
-	switch parsedColor {
-	case models.Black:
-		side = searcher
-	case models.White:
-		side = human
-	}
-
 	var pieceEncoder ascii.PieceEncoder
 	var placeholder string
 	if *useUnicode {
@@ -341,6 +318,7 @@ func main() {
 		margins = wideMargins
 	}
 
+	side := climodels.NewSide(parsedColor)
 	reader := bufio.NewReader(os.Stdin)
 	storageEncoder :=
 		ascii.NewPieceStorageEncoder(
@@ -360,7 +338,7 @@ loop:
 		var move models.Move
 		var err error
 		switch side {
-		case human:
+		case climodels.Human:
 			move, err = readMove(
 				reader,
 				storageEncoder,
@@ -368,7 +346,7 @@ loop:
 				parsedColor,
 				side,
 			)
-		case searcher:
+		case climodels.Searcher:
 			move, err = searchMove(
 				cache,
 				storageEncoder,
@@ -395,6 +373,6 @@ loop:
 		}
 
 		storage = storage.ApplyMove(move)
-		side = side.invert()
+		side = side.Invert()
 	}
 }
