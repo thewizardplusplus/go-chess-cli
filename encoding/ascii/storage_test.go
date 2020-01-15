@@ -317,6 +317,74 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"\n" +
 				"\n",
 		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Piece: PieceMargins{
+						HorizontalMargins: HorizontalMargins{
+							Left:  1,
+							Right: 2,
+						},
+						VerticalMargins: VerticalMargins{
+							Top:    1,
+							Bottom: 2,
+						},
+					},
+					Legend: LegendMargins{
+						File: VerticalMargins{
+							Top:    1,
+							Bottom: 2,
+						},
+						Rank: HorizontalMargins{
+							Left:  1,
+							Right: 2,
+						},
+					},
+				},
+				topColor: models.Black,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "\n" +
+				" 8   r   x   x   x   k   x   x   r  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 7   p   x   p   p   q   p   b   x  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 6   b   n   x   x   p   n   p   x  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 5   x   x   x   P   N   x   x   x  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 4   x   p   x   x   P   x   x   x  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 3   x   x   N   x   x   Q   x   p  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 2   P   P   P   B   B   P   P   P  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				" 1   R   x   x   x   K   x   x   R  \n" +
+				"\n" +
+				"\n" +
+				"\n" +
+				"     a   b   c   d   e   f   g   h  \n" +
+				"\n" +
+				"\n",
+		},
 	} {
 		storage, err := uci.DecodePieceStorage(
 			data.args.boardInFEN,
@@ -338,8 +406,6 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			encoder.EncodePieceStorage(storage)
 
 		if got != data.want {
-			test.Log(got)
-			test.Log(data.want)
 			test.Fail()
 		}
 	}
