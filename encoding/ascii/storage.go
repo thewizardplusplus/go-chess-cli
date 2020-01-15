@@ -79,13 +79,10 @@ func (
 	for _, rank := range ranks {
 		sparseRanks = append(
 			sparseRanks,
-			empties(encoder.margins.Piece.Top)...,
-		)
-		sparseRanks = append(sparseRanks, rank)
-		sparseRanks = append(
-			sparseRanks,
-			empties(
-				encoder.margins.Piece.Bottom,
+			wrapWithEmptyLines(
+				rank,
+				encoder.margins.
+					Piece.VerticalMargins,
 			)...,
 		)
 	}
@@ -107,14 +104,13 @@ func (
 	if encoder.margins.Legend.File.Bottom > 0 {
 		encoder.margins.Legend.File.Bottom++
 	}
-	sparseRanks = append(sparseRanks, empties(
-		encoder.margins.Legend.File.Top,
-	)...)
-	sparseRanks =
-		append(sparseRanks, legendRank)
-	sparseRanks = append(sparseRanks, empties(
-		encoder.margins.Legend.File.Bottom,
-	)...)
+	sparseRanks = append(
+		sparseRanks,
+		wrapWithEmptyLines(
+			legendRank,
+			encoder.margins.Legend.File,
+		)...,
+	)
 
 	return strings.Join(sparseRanks, "\n")
 }
@@ -132,7 +128,25 @@ func spaces(length int) string {
 	return strings.Repeat(" ", length)
 }
 
-func empties(count int) []string {
+func wrapWithEmptyLines(
+	line string,
+	margins VerticalMargins,
+) []string {
+	var lines []string
+	lines = append(
+		lines,
+		emptyLines(margins.Top)...,
+	)
+	lines = append(lines, line)
+	lines = append(
+		lines,
+		emptyLines(margins.Bottom)...,
+	)
+
+	return lines
+}
+
+func emptyLines(count int) []string {
 	return make([]string, count)
 }
 
