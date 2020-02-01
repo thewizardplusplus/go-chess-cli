@@ -39,10 +39,17 @@ func TestNewPieceStorageEncoder(
 			},
 		},
 	}
+	colorizer := func(
+		text string,
+		color models.Color,
+	) string {
+		panic("not implemented")
+	}
 	encoder := NewPieceStorageEncoder(
 		uci.EncodePiece,
 		"x",
 		margins,
+		colorizer,
 		models.White,
 	)
 
@@ -67,6 +74,16 @@ func TestNewPieceStorageEncoder(
 		test.Fail()
 	}
 
+	gotColorizer := reflect.
+		ValueOf(encoder.colorizer).
+		Pointer()
+	wantColorizer := reflect.
+		ValueOf(colorizer).
+		Pointer()
+	if gotColorizer != wantColorizer {
+		test.Fail()
+	}
+
 	if encoder.topColor != models.White {
 		test.Fail()
 	}
@@ -79,6 +96,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 		encoder     PieceEncoder
 		placeholder string
 		margins     Margins
+		colorizer   Colorizer
 		topColor    models.Color
 	}
 	type args struct {
@@ -96,6 +114,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
+				colorizer:   nil,
 				topColor:    models.Black,
 			},
 			args: args{
@@ -116,6 +135,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
+				colorizer:   nil,
 				topColor:    models.White,
 			},
 			args: args{
@@ -143,7 +163,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.Black,
+				colorizer: nil,
+				topColor:  models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -170,7 +191,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.Black,
+				colorizer: nil,
+				topColor:  models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -221,7 +243,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.White,
+				colorizer: nil,
+				topColor:  models.White,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -272,7 +295,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.Black,
+				colorizer: nil,
+				topColor:  models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -299,7 +323,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.Black,
+				colorizer: nil,
+				topColor:  models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -342,7 +367,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				topColor: models.Black,
+				colorizer: nil,
+				topColor:  models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -398,6 +424,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			encoder:     data.fields.encoder,
 			placeholder: data.fields.placeholder,
 			margins:     data.fields.margins,
+			colorizer:   data.fields.colorizer,
 			topColor:    data.fields.topColor,
 		}
 		got :=

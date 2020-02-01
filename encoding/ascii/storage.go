@@ -12,11 +12,18 @@ type PieceEncoder func(
 	piece models.Piece,
 ) string
 
+// Colorizer ...
+type Colorizer func(
+	text string,
+	color models.Color,
+) string
+
 // PieceStorageEncoder ...
 type PieceStorageEncoder struct {
 	encoder     PieceEncoder
 	placeholder string
 	margins     Margins
+	colorizer   Colorizer
 	topColor    models.Color
 }
 
@@ -25,12 +32,14 @@ func NewPieceStorageEncoder(
 	encoder PieceEncoder,
 	placeholder string,
 	margins Margins,
+	colorizer Colorizer,
 	topColor models.Color,
 ) PieceStorageEncoder {
 	return PieceStorageEncoder{
 		encoder:     encoder,
 		placeholder: placeholder,
 		margins:     margins,
+		colorizer:   colorizer,
 		topColor:    topColor,
 	}
 }

@@ -325,6 +325,7 @@ func main() {
 			pieceEncoder,
 			placeholder,
 			margins,
+			nil,
 			parsedColor.Negative(),
 		)
 	cache := caches.NewParallelCache(
