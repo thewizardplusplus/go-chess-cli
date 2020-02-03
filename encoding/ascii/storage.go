@@ -59,9 +59,10 @@ func (
 	positions := storage.Size().Positions()
 	for _, position := range positions {
 		if len(currentRank) == 0 {
-			currentRank += wrapWithSpaces(
+			currentRank += encoder.wrapWithSpaces(
 				strconv.Itoa(position.Rank+1),
 				legendMargins.Rank,
+				climodels.WithoutColor,
 			)
 		}
 
@@ -72,9 +73,10 @@ func (
 		} else {
 			encodedPiece = encoder.placeholder
 		}
-		currentRank += wrapWithSpaces(
+		currentRank += encoder.wrapWithSpaces(
 			encodedPiece,
 			pieceMargins.HorizontalMargins,
+			climodels.WithoutColor,
 		)
 
 		lastFile := storage.Size().Height - 1
@@ -98,16 +100,18 @@ func (
 		)
 	}
 
-	legendRank := spaces(
-		legendMargins.Rank.Left +
-			legendMargins.Rank.Right +
+	legendRank := encoder.spaces(
+		legendMargins.Rank.Left+
+			legendMargins.Rank.Right+
 			1,
+		climodels.WithoutColor,
 	)
 	width := storage.Size().Width
 	for i := 0; i < width; i++ {
-		legendRank += wrapWithSpaces(
+		legendRank += encoder.wrapWithSpaces(
 			string(i+97),
 			pieceMargins.HorizontalMargins,
+			climodels.WithoutColor,
 		)
 	}
 	sparseRanks = append(
@@ -121,17 +125,29 @@ func (
 	return strings.Join(sparseRanks, "\n")
 }
 
-func wrapWithSpaces(
+func (
+	encoder PieceStorageEncoder,
+) wrapWithSpaces(
 	text string,
 	margins HorizontalMargins,
+	color climodels.OptionalColor,
 ) string {
-	return spaces(margins.Left) +
-		text +
-		spaces(margins.Right)
+	prefix :=
+		encoder.spaces(margins.Left, color)
+	suffix :=
+		encoder.spaces(margins.Right, color)
+	text = encoder.colorizer(text, color)
+	return prefix + text + suffix
 }
 
-func spaces(length int) string {
-	return strings.Repeat(" ", length)
+func (
+	encoder PieceStorageEncoder,
+) spaces(
+	length int,
+	color climodels.OptionalColor,
+) string {
+	text := strings.Repeat(" ", length)
+	return encoder.colorizer(text, color)
 }
 
 func wrapWithEmptyLines(

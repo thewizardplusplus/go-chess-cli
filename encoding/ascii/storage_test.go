@@ -115,8 +115,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
-				colorizer:   nil,
-				topColor:    models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -136,8 +141,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
-				colorizer:   nil,
-				topColor:    models.White,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.White,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -164,8 +174,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -192,8 +207,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -244,8 +264,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.White,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.White,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -296,8 +321,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -324,8 +354,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -368,8 +403,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: nil,
-				topColor:  models.Black,
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					return text
+				},
+				topColor: models.Black,
 			},
 			args: args{
 				boardInFEN: kiwipete,
