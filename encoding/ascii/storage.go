@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	climodels "github.com/thewizardplusplus/go-chess-cli/models"
 	models "github.com/thewizardplusplus/go-chess-models"
 )
 
@@ -15,7 +16,7 @@ type PieceEncoder func(
 // Colorizer ...
 type Colorizer func(
 	text string,
-	color models.Color,
+	color climodels.OptionalColor,
 ) string
 
 // PieceStorageEncoder ...

@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	climodels "github.com/thewizardplusplus/go-chess-cli/models"
 	models "github.com/thewizardplusplus/go-chess-models"
 	"github.com/thewizardplusplus/go-chess-models/encoding/uci"
 	"github.com/thewizardplusplus/go-chess-models/pieces"
@@ -41,7 +42,7 @@ func TestNewPieceStorageEncoder(
 	}
 	colorizer := func(
 		text string,
-		color models.Color,
+		color climodels.OptionalColor,
 	) string {
 		panic("not implemented")
 	}
