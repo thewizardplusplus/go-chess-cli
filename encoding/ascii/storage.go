@@ -57,12 +57,16 @@ func (
 	var ranks []string
 	var currentRank string
 	positions := storage.Size().Positions()
+	startedColor := models.Black
+	currentColor := startedColor
 	for _, position := range positions {
 		if len(currentRank) == 0 {
 			currentRank += encoder.wrapWithSpaces(
 				strconv.Itoa(position.Rank+1),
 				legendMargins.Rank,
-				climodels.WithoutColor,
+				climodels.NewOptionalColor(
+					currentColor,
+				),
 			)
 		}
 
@@ -76,13 +80,20 @@ func (
 		currentRank += encoder.wrapWithSpaces(
 			encodedPiece,
 			pieceMargins.HorizontalMargins,
-			climodels.WithoutColor,
+			climodels.NewOptionalColor(
+				currentColor,
+			),
 		)
+
+		currentColor = currentColor.Negative()
 
 		lastFile := storage.Size().Height - 1
 		if position.File == lastFile {
 			ranks = append(ranks, currentRank)
 			currentRank = ""
+
+			startedColor = startedColor.Negative()
+			currentColor = startedColor
 		}
 	}
 	if encoder.topColor == models.Black {
