@@ -64,9 +64,7 @@ func (
 			currentRank += encoder.wrapWithSpaces(
 				strconv.Itoa(position.Rank+1),
 				legendMargins.Rank,
-				climodels.NewOptionalColor(
-					currentColor,
-				),
+				climodels.WithoutColor,
 			)
 		}
 
