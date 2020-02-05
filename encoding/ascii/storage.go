@@ -6,6 +6,7 @@ import (
 
 	climodels "github.com/thewizardplusplus/go-chess-cli/models"
 	models "github.com/thewizardplusplus/go-chess-models"
+	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
 // PieceEncoder ...
@@ -26,6 +27,7 @@ type PieceStorageEncoder struct {
 	margins     Margins
 	colorizer   Colorizer
 	topColor    models.Color
+	pieceWidth  int
 }
 
 // NewPieceStorageEncoder ...
@@ -42,6 +44,7 @@ func NewPieceStorageEncoder(
 		margins:     margins,
 		colorizer:   colorizer,
 		topColor:    topColor,
+		pieceWidth:  detectPieceWidth(encoder),
 	}
 }
 
@@ -102,9 +105,11 @@ func (
 	for _, rank := range ranks {
 		sparseRanks = append(
 			sparseRanks,
-			wrapWithEmptyLines(
+			encoder.wrapWithEmptyLines(
 				rank,
+				storage.Size().Width,
 				pieceMargins.VerticalMargins,
+				startedColor,
 			)...,
 		)
 	}
@@ -125,9 +130,11 @@ func (
 	}
 	sparseRanks = append(
 		sparseRanks,
-		wrapWithEmptyLines(
+		encoder.wrapWithEmptyLines(
 			legendRank,
+			storage.Size().Width,
 			legendMargins.File,
+			startedColor,
 		)...,
 	)
 
@@ -159,26 +166,86 @@ func (
 	return encoder.colorizer(text, color)
 }
 
-func wrapWithEmptyLines(
+func (
+	encoder PieceStorageEncoder,
+) wrapWithEmptyLines(
 	line string,
+	width int,
 	margins VerticalMargins,
+	startedColor models.Color,
 ) []string {
 	var lines []string
-	lines = append(
-		lines,
-		emptyLines(margins.Top)...,
-	)
+	lines = append(lines, encoder.emptyLines(
+		margins.Top,
+		width,
+		startedColor,
+	)...)
 	lines = append(lines, line)
-	lines = append(
-		lines,
-		emptyLines(margins.Bottom)...,
-	)
+	lines = append(lines, encoder.emptyLines(
+		margins.Bottom,
+		width,
+		startedColor,
+	)...)
 
 	return lines
 }
 
-func emptyLines(count int) []string {
-	return make([]string, count)
+func (
+	encoder PieceStorageEncoder,
+) emptyLines(
+	count int,
+	width int,
+	startedColor models.Color,
+) []string {
+	var lines []string
+	for i := 0; i < count; i++ {
+		line :=
+			encoder.emptyLine(width, startedColor)
+		lines = append(lines, line)
+	}
+
+	return lines
+}
+
+func (
+	encoder PieceStorageEncoder,
+) emptyLine(
+	width int,
+	startedColor models.Color,
+) string {
+	pieceMargins := encoder.margins.Piece
+	legendMargins := encoder.margins.Legend
+
+	line := encoder.spaces(
+		legendMargins.Rank.Left+
+			legendMargins.Rank.Right+
+			1,
+		climodels.WithoutColor,
+	)
+	currentColor := startedColor
+	for i := 0; i < width; i++ {
+		line += encoder.spaces(
+			pieceMargins.Left+
+				pieceMargins.Right+
+				encoder.pieceWidth,
+			climodels.NewOptionalColor(
+				currentColor,
+			),
+		)
+		currentColor = currentColor.Negative()
+	}
+
+	return line
+}
+
+func detectPieceWidth(
+	encoder PieceEncoder,
+) int {
+	pieceSample := pieces.NewKing(
+		models.White,
+		models.Position{},
+	)
+	return len([]rune(encoder(pieceSample)))
 }
 
 func reverse(strings []string) {
