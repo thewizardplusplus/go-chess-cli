@@ -479,7 +479,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 					var colorMark byte
 					if color.IsSet {
 						colorMark =
-							EncodeColor(color.Color)[0]
+							EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
@@ -531,7 +531,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 					var colorMark byte
 					if color.IsSet {
 						colorMark =
-							EncodeColor(color.Color)[0]
+							EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
@@ -583,7 +583,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 					var colorMark byte
 					if color.IsSet {
 						colorMark =
-							EncodeColor(color.Color)[0]
+							EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}

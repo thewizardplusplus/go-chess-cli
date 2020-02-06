@@ -6,7 +6,7 @@ import (
 
 // OptionalColor ...
 type OptionalColor struct {
-	Color models.Color
+	Value models.Color
 	IsSet bool
 }
 
@@ -28,6 +28,6 @@ func (
 		return WithoutColor
 	}
 
-	negativeColor := color.Color.Negative()
+	negativeColor := color.Value.Negative()
 	return NewOptionalColor(negativeColor)
 }
