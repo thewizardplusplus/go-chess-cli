@@ -90,6 +90,10 @@ func TestNewPieceStorageEncoder(
 	if encoder.topColor != models.White {
 		test.Fail()
 	}
+
+	if encoder.pieceWidth != 1 {
+		test.Fail()
+	}
 }
 
 func TestPieceStorageEncoderEncodePieceStorage(
@@ -101,6 +105,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 		margins     Margins
 		colorizer   Colorizer
 		topColor    models.Color
+		pieceWidth  int
 	}
 	type args struct {
 		boardInFEN string
@@ -111,7 +116,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 		want   string
 	}
 
-	for _, data := range []data{
+	for index, data := range []data{
 		data{
 			fields: fields{
 				encoder:     uci.EncodePiece,
@@ -123,7 +128,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -149,7 +155,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.White,
+				topColor:   models.White,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -182,7 +189,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -215,43 +223,44 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
 			},
-			want: "\n" +
+			want: strings.Repeat(" ", 9) + "\n" +
 				"8rxxxkxxr\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"7pxppqpbx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"6bnxxpnpx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"5xxxPNxxx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"4xpxxPxxx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"3xxNxxQxp\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"2PPPBBPPP\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"1RxxxKxxR\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh",
 		},
 		data{
@@ -272,43 +281,44 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.White,
+				topColor:   models.White,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
 			},
-			want: "\n" +
+			want: strings.Repeat(" ", 9) + "\n" +
 				"1RxxxKxxR\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"2PPPBBPPP\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"3xxNxxQxp\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"4xpxxPxxx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"5xxxPNxxx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"6bnxxpnpx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"7pxppqpbx\n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				"8rxxxkxxr\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh",
 		},
 		data{
@@ -329,7 +339,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -362,7 +373,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -375,9 +387,10 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"3xxNxxQxp\n" +
 				"2PPPBBPPP\n" +
 				"1RxxxKxxR\n" +
-				"\n" +
+				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh\n" +
-				"\n",
+				strings.Repeat(" ", 9) + "\n" +
+				"         ",
 		},
 		data{
 			fields: fields{
@@ -411,46 +424,87 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				) string {
 					return text
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
 			},
-			want: "\n" +
+			want: strings.Repeat(" ", 4*9) + "\n" +
 				" 8   r   x   x   x   k   x   x   r  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 7   p   x   p   p   q   p   b   x  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 6   b   n   x   x   p   n   p   x  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 5   x   x   x   P   N   x   x   x  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 4   x   p   x   x   P   x   x   x  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 3   x   x   N   x   x   Q   x   p  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 2   P   P   P   B   B   P   P   P  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				" 1   R   x   x   x   K   x   x   R  \n" +
-				"\n" +
-				"\n" +
-				"\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9) + "\n" +
 				"     a   b   c   d   e   f   g   h  \n" +
-				"\n",
+				strings.Repeat(" ", 4*9) + "\n" +
+				strings.Repeat(" ", 4*9),
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins:     Margins{},
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					var colorMark byte
+					if color.IsSet {
+						colorMark =
+							EncodeColor(color.Color)[0]
+					} else {
+						colorMark = 'n'
+					}
+
+					return fmt.Sprintf(
+						"(%c%s)",
+						colorMark,
+						text,
+					)
+				},
+				topColor:   models.Black,
+				pieceWidth: 1,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "(n8)(wr)(bx)(wx)(bx)(wk)(bx)(wx)(br)\n" +
+				"(n7)(bp)(wx)(bp)(wp)(bq)(wp)(bb)(wx)\n" +
+				"(n6)(wb)(bn)(wx)(bx)(wp)(bn)(wp)(bx)\n" +
+				"(n5)(bx)(wx)(bx)(wP)(bN)(wx)(bx)(wx)\n" +
+				"(n4)(wx)(bp)(wx)(bx)(wP)(bx)(wx)(bx)\n" +
+				"(n3)(bx)(wx)(bN)(wx)(bx)(wQ)(bx)(wp)\n" +
+				"(n2)(wP)(bP)(wP)(bB)(wB)(bP)(wP)(bP)\n" +
+				"(n1)(bR)(wx)(bx)(wx)(bK)(wx)(bx)(wR)\n" +
+				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)",
 		},
 		data{
 			fields: fields{
@@ -488,7 +542,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						text,
 					)
 				},
-				topColor: models.Black,
+				topColor:   models.Black,
+				pieceWidth: 1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -502,6 +557,76 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n )(n2)(n )(w )(wP)(w )(b )(bP)(b )(w )(wP)(w )(b )(bB)(b )(w )(wB)(w )(b )(bP)(b )(w )(wP)(w )(b )(bP)(b )\n" +
 				"(n )(n1)(n )(b )(bR)(b )(w )(wx)(w )(b )(bx)(b )(w )(wx)(w )(b )(bK)(b )(w )(wx)(w )(b )(bx)(b )(w )(wR)(w )\n" +
 				"(n   )(n )(na)(n )(n )(nb)(n )(n )(nc)(n )(n )(nd)(n )(n )(ne)(n )(n )(nf)(n )(n )(ng)(n )(n )(nh)(n )",
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Piece: PieceMargins{
+						VerticalMargins: VerticalMargins{
+							Top:    1,
+							Bottom: 1,
+						},
+					},
+					Legend: LegendMargins{
+						File: VerticalMargins{
+							Top:    1,
+							Bottom: 1,
+						},
+					},
+				},
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					var colorMark byte
+					if color.IsSet {
+						colorMark =
+							EncodeColor(color.Color)[0]
+					} else {
+						colorMark = 'n'
+					}
+
+					return fmt.Sprintf(
+						"(%c%s)",
+						colorMark,
+						text,
+					)
+				},
+				topColor:   models.Black,
+				pieceWidth: 1,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n8)(wr)(bx)(wx)(bx)(wk)(bx)(wx)(br)\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n7)(bp)(wx)(bp)(wp)(bq)(wp)(bb)(wx)\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n6)(wb)(bn)(wx)(bx)(wp)(bn)(wp)(bx)\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n5)(bx)(wx)(bx)(wP)(bN)(wx)(bx)(wx)\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n4)(wx)(bp)(wx)(bx)(wP)(bx)(wx)(bx)\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n3)(bx)(wx)(bN)(wx)(bx)(wQ)(bx)(wp)\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n2)(wP)(bP)(wP)(bB)(wB)(bP)(wP)(bP)\n" +
+				"(n )(w )(b )(w )(b )(w )(b )(w )(b )\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n1)(bR)(wx)(bx)(wx)(bK)(wx)(bx)(wR)\n" +
+				"(n )(b )(w )(b )(w )(b )(w )(b )(w )\n" +
+				"(n )(n )(n )(n )(n )(n )(n )(n )(n )\n" +
+				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)\n" +
+				"(n )(n )(n )(n )(n )(n )(n )(n )(n )",
 		},
 	} {
 		storage, err := uci.DecodePieceStorage(
@@ -520,11 +645,13 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			margins:     data.fields.margins,
 			colorizer:   data.fields.colorizer,
 			topColor:    data.fields.topColor,
+			pieceWidth:  data.fields.pieceWidth,
 		}
 		got :=
 			encoder.EncodePieceStorage(storage)
 
 		if got != data.want {
+			test.Log(index)
 			gotl := strings.Split(got, "\n")
 			wantl := strings.Split(data.want, "\n")
 			for i := range gotl {
@@ -532,8 +659,8 @@ func TestPieceStorageEncoderEncodePieceStorage(
 					continue
 				}
 
-				test.Log(gotl[i])
-				test.Log(wantl[i])
+				test.Logf("%q", gotl[i])
+				test.Logf("%q", wantl[i])
 			}
 
 			test.Fail()
