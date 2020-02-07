@@ -327,6 +327,7 @@ func main() {
 			margins,
 			nil,
 			parsedColor.Negative(),
+			1,
 		)
 	cache := caches.NewParallelCache(
 		caches.NewStringHashingCache(

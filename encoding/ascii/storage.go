@@ -6,7 +6,6 @@ import (
 
 	climodels "github.com/thewizardplusplus/go-chess-cli/models"
 	models "github.com/thewizardplusplus/go-chess-models"
-	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
 // PieceEncoder ...
@@ -37,6 +36,7 @@ func NewPieceStorageEncoder(
 	margins Margins,
 	colorizer Colorizer,
 	topColor models.Color,
+	pieceWidth int,
 ) PieceStorageEncoder {
 	return PieceStorageEncoder{
 		encoder:     encoder,
@@ -44,7 +44,7 @@ func NewPieceStorageEncoder(
 		margins:     margins,
 		colorizer:   colorizer,
 		topColor:    topColor,
-		pieceWidth:  detectPieceWidth(encoder),
+		pieceWidth:  pieceWidth,
 	}
 }
 
@@ -241,16 +241,6 @@ func (
 	}
 
 	return line
-}
-
-func detectPieceWidth(
-	encoder PieceEncoder,
-) int {
-	pieceSample := pieces.NewKing(
-		models.White,
-		models.Position{},
-	)
-	return len([]rune(encoder(pieceSample)))
 }
 
 func reverse(strings []string) {

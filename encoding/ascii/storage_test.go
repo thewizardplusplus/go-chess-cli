@@ -54,6 +54,7 @@ func TestNewPieceStorageEncoder(
 		margins,
 		colorizer,
 		models.White,
+		2,
 	)
 
 	gotEncoder := reflect.
@@ -91,7 +92,7 @@ func TestNewPieceStorageEncoder(
 		test.Fail()
 	}
 
-	if encoder.pieceWidth != 1 {
+	if encoder.pieceWidth != 2 {
 		test.Fail()
 	}
 }
