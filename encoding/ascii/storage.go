@@ -118,9 +118,7 @@ func (
 	}
 
 	legendRank := encoder.spaces(
-		legendMargins.Rank.Left+
-			legendMargins.Rank.Right+
-			1,
+		legendMargins.Rank.Width(1),
 		climodels.WithoutColor,
 	)
 	width := storage.Size().Width
@@ -224,17 +222,14 @@ func (
 	legendMargins := encoder.margins.Legend
 
 	line := encoder.spaces(
-		legendMargins.Rank.Left+
-			legendMargins.Rank.Right+
-			1,
+		legendMargins.Rank.Width(1),
 		climodels.WithoutColor,
 	)
 	currentColor := startedColor
 	for i := 0; i < width; i++ {
 		line += encoder.spaces(
-			pieceMargins.Left+
-				pieceMargins.Right+
-				encoder.pieceWidth,
+			pieceMargins.
+				Width(encoder.pieceWidth),
 			currentColor,
 		)
 		currentColor = currentColor.Negative()

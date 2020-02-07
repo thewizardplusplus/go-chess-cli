@@ -629,6 +629,84 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)\n" +
 				"(n )(n )(n )(n )(n )(n )(n )(n )(n )",
 		},
+		/*  data{
+		    fields: fields{
+		      encoder:     uci.EncodePiece,
+		      placeholder: "x",
+		      margins: Margins{
+		        Piece: PieceMargins{
+		          HorizontalMargins: HorizontalMargins{
+		            Left:  1,
+		            Right: 1,
+		          },
+		          VerticalMargins: VerticalMargins{
+		            Top:    1,
+		            Bottom: 1,
+		          },
+		        },
+		        Legend: LegendMargins{
+		          File: VerticalMargins{
+		            Top:    1,
+		            Bottom: 1,
+		          },
+		          Rank: HorizontalMargins{
+		            Left:  1,
+		            Right: 1,
+		          },
+		        },
+		      },
+		      colorizer: func(
+		        text string,
+		        color climodels.OptionalColor,
+		      ) string {
+		        var colorMark byte
+		        if color.IsSet {
+		          colorMark =
+		            EncodeColor(color.Value)[0]
+		        } else {
+		          colorMark = 'n'
+		        }
+
+		        return fmt.Sprintf(
+		          "(%c%s)",
+		          colorMark,
+		          text,
+		        )
+		      },
+		      topColor:   models.Black,
+		      pieceWidth: 1,
+		    },
+		    args: args{
+		      boardInFEN: kiwipete,
+		    },
+		    want: "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n )(n8)(n )(w )(wr)(w )(b )(bx)(b )(w )(wx)(w )(b )(bx)(b )(w )(wk)(w )(b )(bx)(b )(w )(wx)(w )(b )(br)(b )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n7)(n )(b )(bp)(b )(w )(wx)(w )(b )(bp)(b )(w )(wp)(w )(b )(bq)(b )(w )(wp)(w )(b )(bb)(b )(w )(wx)(w )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n6)(n )(w )(wb)(w )(b )(bn)(b )(w )(wx)(w )(b )(bx)(b )(w )(wp)(w )(b )(bn)(b )(w )(wp)(w )(b )(bx)(b )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n5)(n )(b )(bx)(b )(w )(wx)(w )(b )(bx)(b )(w )(wP)(w )(b )(bN)(b )(w )(wx)(w )(b )(bx)(b )(w )(wx)(w )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n4)(n )(w )(wx)(w )(b )(bp)(b )(w )(wx)(w )(b )(bx)(b )(w )(wP)(w )(b )(bx)(b )(w )(wx)(w )(b )(bx)(b )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n3)(n )(b )(bx)(b )(w )(wx)(w )(b )(bN)(b )(w )(wx)(w )(b )(bx)(b )(w )(wQ)(w )(b )(bx)(b )(w )(wp)(w )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n2)(n )(w )(wP)(w )(b )(bP)(b )(w )(wP)(w )(b )(bB)(b )(w )(wB)(w )(b )(bP)(b )(w )(wP)(w )(b )(bP)(b )\n" +
+		      "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n )(n1)(n )(b )(bR)(b )(w )(wx)(w )(b )(bx)(b )(w )(wx)(w )(b )(bK)(b )(w )(wx)(w )(b )(bx)(b )(w )(wR)(w )\n" +
+		      "(n   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )\n" +
+		      "(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )\n" +
+		      "(n   )(n )(na)(n )(n )(nb)(n )(n )(nc)(n )(n )(nd)(n )(n )(ne)(n )(n )(nf)(n )(n )(ng)(n )(n )(nh)(n )\n" +
+		      "(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )\n",
+		  },*/
 	} {
 		storage, err := uci.DecodePieceStorage(
 			data.args.boardInFEN,

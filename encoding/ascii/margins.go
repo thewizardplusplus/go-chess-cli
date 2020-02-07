@@ -6,6 +6,15 @@ type HorizontalMargins struct {
 	Right int
 }
 
+// Width ...
+func (margins HorizontalMargins) Width(
+	contentWidth int,
+) int {
+	return margins.Left +
+		margins.Right +
+		contentWidth
+}
+
 // VerticalMargins ...
 type VerticalMargins struct {
 	Top    int
