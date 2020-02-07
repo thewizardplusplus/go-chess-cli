@@ -18,7 +18,7 @@ type PieceStorageEncoder struct {
 	encoder     PieceEncoder
 	placeholder string
 	margins     Margins
-	colorizer   Colorizer
+	colorizer   OptionalColorizer
 	topColor    models.Color
 	pieceWidth  int
 }
@@ -28,7 +28,7 @@ func NewPieceStorageEncoder(
 	encoder PieceEncoder,
 	placeholder string,
 	margins Margins,
-	colorizer Colorizer,
+	colorizer OptionalColorizer,
 	topColor models.Color,
 	pieceWidth int,
 ) PieceStorageEncoder {
