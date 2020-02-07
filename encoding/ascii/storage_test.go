@@ -123,14 +123,9 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
-				topColor:   models.Black,
-				pieceWidth: 1,
+				colorizer:   WithoutColor,
+				topColor:    models.Black,
+				pieceWidth:  1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -150,14 +145,9 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
-				topColor:   models.White,
-				pieceWidth: 1,
+				colorizer:   WithoutColor,
+				topColor:    models.White,
+				pieceWidth:  1,
 			},
 			args: args{
 				boardInFEN: kiwipete,
@@ -184,12 +174,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.Black,
 				pieceWidth: 1,
 			},
@@ -218,12 +203,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.Black,
 				pieceWidth: 1,
 			},
@@ -276,12 +256,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.White,
 				pieceWidth: 1,
 			},
@@ -334,12 +309,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.Black,
 				pieceWidth: 1,
 			},
@@ -368,12 +338,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.Black,
 				pieceWidth: 1,
 			},
@@ -419,12 +384,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
-					return text
-				},
+				colorizer:  WithoutColor,
 				topColor:   models.Black,
 				pieceWidth: 1,
 			},

@@ -13,12 +13,6 @@ type PieceEncoder func(
 	piece models.Piece,
 ) string
 
-// Colorizer ...
-type Colorizer func(
-	text string,
-	color climodels.OptionalColor,
-) string
-
 // PieceStorageEncoder ...
 type PieceStorageEncoder struct {
 	encoder     PieceEncoder
