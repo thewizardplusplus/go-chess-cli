@@ -54,28 +54,32 @@ var (
 			Right: 1,
 		},
 	}
+
+	pieceColorsCodes = map[models.Color]int{
+		models.Black: 34, // blue
+		models.White: 31, // red
+	}
+	squareColorsCodes = map[models.Color]int{
+		models.Black: 40, // black
+		models.White: 47, // white
+	}
 )
 
-func colorizePiece(
-	text string,
-	color models.Color,
-) string {
-	return fmt.Sprintf(
-		"[%c%s]",
-		ascii.EncodeColor(color)[0],
-		text,
-	)
+func setTTYMode(mode int) string {
+	return fmt.Sprintf("\x1b[%dm", mode)
 }
 
-func colorizeSquare(
-	text string,
-	color models.Color,
-) string {
-	return fmt.Sprintf(
-		"(%c%s)",
-		ascii.EncodeColor(color)[0],
-		text,
-	)
+func makeColorizer(
+	colorsCodes map[models.Color]int,
+) ascii.Colorizer {
+	return func(
+		text string,
+		color models.Color,
+	) string {
+		return setTTYMode(colorsCodes[color]) +
+			text +
+			setTTYMode(0)
+	}
 }
 
 func search(
@@ -349,12 +353,15 @@ func main() {
 		placeholder = "."
 	}
 	if *colorful {
+		pieceColorizer :=
+			makeColorizer(pieceColorsCodes)
 		basePieceEncoder := pieceEncoder
 		pieceEncoder = func(
 			piece models.Piece,
 		) string {
-			return colorizePiece(
-				basePieceEncoder(piece),
+			text := basePieceEncoder(piece)
+			return pieceColorizer(
+				text,
 				piece.Color(),
 			)
 		}
@@ -373,13 +380,16 @@ func main() {
 		margins.Legend = wideLegendMargins
 	}
 
-	var colorizer ascii.OptionalColorizer
+	var squareColorizer ascii.OptionalColorizer
 	if *colorful {
-		colorizer = ascii.NewOptionalColorizer(
-			colorizeSquare,
-		)
+		baseSquareColorizer :=
+			makeColorizer(squareColorsCodes)
+		squareColorizer =
+			ascii.NewOptionalColorizer(
+				baseSquareColorizer,
+			)
 	} else {
-		colorizer = ascii.WithoutColor
+		squareColorizer = ascii.WithoutColor
 	}
 
 	side := climodels.NewSide(parsedColor)
@@ -389,7 +399,7 @@ func main() {
 			pieceEncoder,
 			placeholder,
 			margins,
-			colorizer,
+			squareColorizer,
 			parsedColor.Negative(),
 			1,
 		)
