@@ -27,26 +27,56 @@ import (
 )
 
 var (
-	wideMargins = ascii.Margins{
-		Piece: ascii.PieceMargins{
-			HorizontalMargins: ascii.HorizontalMargins{
-				Left: 1,
-			},
-			VerticalMargins: ascii.VerticalMargins{
-				Top: 1,
-			},
+	widePieceMargins = ascii.PieceMargins{
+		HorizontalMargins: ascii.HorizontalMargins{
+			Left: 1,
 		},
-		Legend: ascii.LegendMargins{
-			File: ascii.VerticalMargins{
-				Top:    2,
-				Bottom: 1,
-			},
-			Rank: ascii.HorizontalMargins{
-				Right: 1,
-			},
+		VerticalMargins: ascii.VerticalMargins{
+			Top: 1,
+		},
+	}
+	extraWidePieceMargins = ascii.PieceMargins{
+		HorizontalMargins: ascii.HorizontalMargins{
+			Left:  1,
+			Right: 1,
+		},
+		VerticalMargins: ascii.VerticalMargins{
+			Top:    1,
+			Bottom: 1,
+		},
+	}
+	wideLegendMargins = ascii.LegendMargins{
+		File: ascii.VerticalMargins{
+			Top:    2,
+			Bottom: 1,
+		},
+		Rank: ascii.HorizontalMargins{
+			Right: 1,
 		},
 	}
 )
+
+func colorizePiece(
+	text string,
+	color models.Color,
+) string {
+	return fmt.Sprintf(
+		"[%c%s]",
+		ascii.EncodeColor(color)[0],
+		text,
+	)
+}
+
+func colorizeSquare(
+	text string,
+	color models.Color,
+) string {
+	return fmt.Sprintf(
+		"(%c%s)",
+		ascii.EncodeColor(color)[0],
+		text,
+	)
+}
 
 func search(
 	cache caches.Cache,
@@ -267,6 +297,12 @@ func main() {
 		true,
 		"use Unicode to display pieces",
 	)
+	colorful := flag.Bool(
+		"colorful",
+		true,
+		"use colors to display "+
+			"the board and pieces",
+	)
 	wide := flag.Bool(
 		"wide",
 		true,
@@ -312,10 +348,38 @@ func main() {
 		pieceEncoder = uci.EncodePiece
 		placeholder = "."
 	}
+	if *colorful {
+		basePieceEncoder := pieceEncoder
+		pieceEncoder = func(
+			piece models.Piece,
+		) string {
+			return colorizePiece(
+				basePieceEncoder(piece),
+				piece.Color(),
+			)
+		}
+
+		placeholder = " "
+	}
 
 	var margins ascii.Margins
 	if *wide {
-		margins = wideMargins
+		if *colorful {
+			margins.Piece = extraWidePieceMargins
+		} else {
+			margins.Piece = widePieceMargins
+		}
+
+		margins.Legend = wideLegendMargins
+	}
+
+	var colorizer ascii.OptionalColorizer
+	if *colorful {
+		colorizer = ascii.NewOptionalColorizer(
+			colorizeSquare,
+		)
+	} else {
+		colorizer = ascii.WithoutColor
 	}
 
 	side := climodels.NewSide(parsedColor)
@@ -325,7 +389,7 @@ func main() {
 			pieceEncoder,
 			placeholder,
 			margins,
-			nil,
+			colorizer,
 			parsedColor.Negative(),
 			1,
 		)
