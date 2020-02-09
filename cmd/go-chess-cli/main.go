@@ -27,31 +27,44 @@ import (
 )
 
 var (
-	widePieceMargins = ascii.PieceMargins{
-		HorizontalMargins: ascii.HorizontalMargins{
-			Left: 1,
+	wideMargins = ascii.Margins{
+		Piece: ascii.PieceMargins{
+			HorizontalMargins: ascii.HorizontalMargins{
+				Left: 1,
+			},
+			VerticalMargins: ascii.VerticalMargins{
+				Top: 1,
+			},
 		},
-		VerticalMargins: ascii.VerticalMargins{
-			Top: 1,
+		Legend: ascii.LegendMargins{
+			File: ascii.VerticalMargins{
+				Top:    2,
+				Bottom: 1,
+			},
+			Rank: ascii.HorizontalMargins{
+				Right: 1,
+			},
 		},
 	}
-	extraWidePieceMargins = ascii.PieceMargins{
-		HorizontalMargins: ascii.HorizontalMargins{
-			Left:  1,
-			Right: 1,
+	extraWideMargins = ascii.Margins{
+		Piece: ascii.PieceMargins{
+			HorizontalMargins: ascii.HorizontalMargins{
+				Left:  1,
+				Right: 1,
+			},
+			VerticalMargins: ascii.VerticalMargins{
+				Top:    1,
+				Bottom: 1,
+			},
 		},
-		VerticalMargins: ascii.VerticalMargins{
-			Top:    1,
-			Bottom: 1,
-		},
-	}
-	wideLegendMargins = ascii.LegendMargins{
-		File: ascii.VerticalMargins{
-			Top:    2,
-			Bottom: 1,
-		},
-		Rank: ascii.HorizontalMargins{
-			Right: 1,
+		Legend: ascii.LegendMargins{
+			File: ascii.VerticalMargins{
+				Top:    1,
+				Bottom: 1,
+			},
+			Rank: ascii.HorizontalMargins{
+				Right: 1,
+			},
 		},
 	}
 
@@ -372,12 +385,10 @@ func main() {
 	var margins ascii.Margins
 	if *wide {
 		if *colorful {
-			margins.Piece = extraWidePieceMargins
+			margins = extraWideMargins
 		} else {
-			margins.Piece = widePieceMargins
+			margins = wideMargins
 		}
-
-		margins.Legend = wideLegendMargins
 	}
 
 	var squareColorizer ascii.OptionalColorizer
