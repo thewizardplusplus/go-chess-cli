@@ -37,4 +37,5 @@ type LegendMargins struct {
 type Margins struct {
 	Piece  PieceMargins
 	Legend LegendMargins
+	Board  VerticalMargins
 }

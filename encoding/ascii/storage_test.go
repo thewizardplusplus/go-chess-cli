@@ -356,7 +356,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh\n" +
 				strings.Repeat(" ", 9) + "\n" +
-				"         ",
+				strings.Repeat(" ", 9),
 		},
 		data{
 			fields: fields{
@@ -666,6 +666,83 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )\n" +
 				"(n   )(n )(na)(n )(n )(nb)(n )(n )(nc)(n )(n )(nd)(n )(n )(ne)(n )(n )(nf)(n )(n )(ng)(n )(n )(nh)(n )\n" +
 				"(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )",
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Board: VerticalMargins{
+						Top:    1,
+						Bottom: 2,
+					},
+				},
+				colorizer:  WithoutColor,
+				topColor:   models.Black,
+				pieceWidth: 1,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: strings.Repeat(" ", 9) + "\n" +
+				"8rxxxkxxr\n" +
+				"7pxppqpbx\n" +
+				"6bnxxpnpx\n" +
+				"5xxxPNxxx\n" +
+				"4xpxxPxxx\n" +
+				"3xxNxxQxp\n" +
+				"2PPPBBPPP\n" +
+				"1RxxxKxxR\n" +
+				" abcdefgh\n" +
+				strings.Repeat(" ", 9) + "\n" +
+				strings.Repeat(" ", 9),
+		},
+		data{
+			fields: fields{
+				encoder:     uci.EncodePiece,
+				placeholder: "x",
+				margins: Margins{
+					Board: VerticalMargins{
+						Top:    1,
+						Bottom: 2,
+					},
+				},
+				colorizer: func(
+					text string,
+					color climodels.OptionalColor,
+				) string {
+					var colorMark byte
+					if color.IsSet {
+						colorMark =
+							EncodeColor(color.Value)[0]
+					} else {
+						colorMark = 'n'
+					}
+
+					return fmt.Sprintf(
+						"(%c%s)",
+						colorMark,
+						text,
+					)
+				},
+				topColor:   models.Black,
+				pieceWidth: 1,
+			},
+			args: args{
+				boardInFEN: kiwipete,
+			},
+			want: "(n )(n )(n )(n )(n )(n )(n )(n )(n )\n" +
+				"(n8)(wr)(bx)(wx)(bx)(wk)(bx)(wx)(br)\n" +
+				"(n7)(bp)(wx)(bp)(wp)(bq)(wp)(bb)(wx)\n" +
+				"(n6)(wb)(bn)(wx)(bx)(wp)(bn)(wp)(bx)\n" +
+				"(n5)(bx)(wx)(bx)(wP)(bN)(wx)(bx)(wx)\n" +
+				"(n4)(wx)(bp)(wx)(bx)(wP)(bx)(wx)(bx)\n" +
+				"(n3)(bx)(wx)(bN)(wx)(bx)(wQ)(bx)(wp)\n" +
+				"(n2)(wP)(bP)(wP)(bB)(wB)(bP)(wP)(bP)\n" +
+				"(n1)(bR)(wx)(bx)(wx)(bK)(wx)(bx)(wR)\n" +
+				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)\n" +
+				"(n )(n )(n )(n )(n )(n )(n )(n )(n )\n" +
+				"(n )(n )(n )(n )(n )(n )(n )(n )(n )",
 		},
 	} {
 		storage, err := uci.DecodePieceStorage(

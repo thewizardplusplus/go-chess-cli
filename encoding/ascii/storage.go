@@ -101,7 +101,7 @@ func (
 		sparseRanks = append(
 			sparseRanks,
 			encoder.wrapWithEmptyLines(
-				rank,
+				[]string{rank},
 				storage.Size().Width,
 				pieceMargins.VerticalMargins,
 				climodels.NewOptionalColor(
@@ -126,11 +126,18 @@ func (
 	sparseRanks = append(
 		sparseRanks,
 		encoder.wrapWithEmptyLines(
-			legendRank,
+			[]string{legendRank},
 			storage.Size().Width,
 			legendMargins.File,
 			climodels.WithoutColor,
 		)...,
+	)
+
+	sparseRanks = encoder.wrapWithEmptyLines(
+		sparseRanks,
+		storage.Size().Width,
+		encoder.margins.Board,
+		climodels.WithoutColor,
 	)
 
 	return strings.Join(sparseRanks, "\n")
@@ -168,25 +175,34 @@ func (
 func (
 	encoder PieceStorageEncoder,
 ) wrapWithEmptyLines(
-	line string,
+	lines []string,
 	width int,
 	margins VerticalMargins,
 	startedColor climodels.OptionalColor,
 ) []string {
-	var lines []string
-	lines = append(lines, encoder.emptyLines(
-		margins.Top,
-		width,
-		startedColor,
-	)...)
-	lines = append(lines, line)
-	lines = append(lines, encoder.emptyLines(
-		margins.Bottom,
-		width,
-		startedColor,
-	)...)
+	var wrappedLines []string
+	wrappedLines = append(
+		wrappedLines,
+		encoder.emptyLines(
+			margins.Top,
+			width,
+			startedColor,
+		)...,
+	)
+	wrappedLines = append(
+		wrappedLines,
+		lines...,
+	)
+	wrappedLines = append(
+		wrappedLines,
+		encoder.emptyLines(
+			margins.Bottom,
+			width,
+			startedColor,
+		)...,
+	)
 
-	return lines
+	return wrappedLines
 }
 
 func (
