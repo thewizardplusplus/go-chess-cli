@@ -33,17 +33,20 @@ var (
 				Left: 1,
 			},
 			VerticalMargins: ascii.VerticalMargins{
-				Top: 1,
+				Bottom: 1,
 			},
 		},
 		Legend: ascii.LegendMargins{
 			File: ascii.VerticalMargins{
-				Top:    2,
-				Bottom: 1,
+				Top: 1,
 			},
 			Rank: ascii.HorizontalMargins{
 				Right: 1,
 			},
+		},
+		Board: ascii.VerticalMargins{
+			Top:    1,
+			Bottom: 1,
 		},
 	}
 	extraWideMargins = ascii.Margins{
@@ -59,12 +62,15 @@ var (
 		},
 		Legend: ascii.LegendMargins{
 			File: ascii.VerticalMargins{
-				Top:    1,
-				Bottom: 1,
+				Top: 1,
 			},
 			Rank: ascii.HorizontalMargins{
 				Right: 1,
 			},
+		},
+		Board: ascii.VerticalMargins{
+			Top:    1,
+			Bottom: 1,
 		},
 	}
 
@@ -314,11 +320,15 @@ func main() {
 		true,
 		"use Unicode to display pieces",
 	)
-	colorful := flag.Bool(
-		"colorful",
+	colorfulPieces := flag.Bool(
+		"colorfulPieces",
 		true,
-		"use colors to display "+
-			"the board and pieces",
+		"use colors to display pieces",
+	)
+	colorfulBoard := flag.Bool(
+		"colorfulBoard",
+		true,
+		"use colors to display the board",
 	)
 	wide := flag.Bool(
 		"wide",
@@ -365,7 +375,7 @@ func main() {
 		pieceEncoder = uci.EncodePiece
 		placeholder = "."
 	}
-	if *colorful {
+	if *colorfulPieces {
 		pieceColorizer :=
 			makeColorizer(pieceColorsCodes)
 		basePieceEncoder := pieceEncoder
@@ -378,13 +388,14 @@ func main() {
 				piece.Color(),
 			)
 		}
-
+	}
+	if *colorfulBoard {
 		placeholder = " "
 	}
 
 	var margins ascii.Margins
 	if *wide {
-		if *colorful {
+		if *colorfulBoard {
 			margins = extraWideMargins
 		} else {
 			margins = wideMargins
@@ -392,7 +403,7 @@ func main() {
 	}
 
 	var squareColorizer ascii.OptionalColorizer
-	if *colorful {
+	if *colorfulBoard {
 		baseSquareColorizer :=
 			makeColorizer(squareColorsCodes)
 		squareColorizer =
