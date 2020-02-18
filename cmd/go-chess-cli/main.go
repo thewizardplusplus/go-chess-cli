@@ -27,15 +27,7 @@ import (
 )
 
 var (
-	wideMargins = ascii.Margins{
-		Piece: ascii.PieceMargins{
-			HorizontalMargins: ascii.HorizontalMargins{
-				Left: 1,
-			},
-			VerticalMargins: ascii.VerticalMargins{
-				Bottom: 1,
-			},
-		},
+	baseWideMargins = ascii.Margins{
 		Legend: ascii.LegendMargins{
 			File: ascii.VerticalMargins{
 				Top: 1,
@@ -49,26 +41,20 @@ var (
 			Bottom: 1,
 		},
 	}
-	extraWideMargins = ascii.Margins{
-		Piece: ascii.PieceMargins{
-			HorizontalMargins: ascii.HorizontalMargins{
-				Left:  1,
-				Right: 1,
-			},
-			VerticalMargins: ascii.VerticalMargins{
-				Top:    1,
-				Bottom: 1,
-			},
+	widePieceMargins = ascii.PieceMargins{
+		HorizontalMargins: ascii.HorizontalMargins{
+			Left: 1,
 		},
-		Legend: ascii.LegendMargins{
-			File: ascii.VerticalMargins{
-				Top: 1,
-			},
-			Rank: ascii.HorizontalMargins{
-				Right: 1,
-			},
+		VerticalMargins: ascii.VerticalMargins{
+			Bottom: 1,
 		},
-		Board: ascii.VerticalMargins{
+	}
+	extraWidePieceMargins = ascii.PieceMargins{
+		HorizontalMargins: ascii.HorizontalMargins{
+			Left:  1,
+			Right: 1,
+		},
+		VerticalMargins: ascii.VerticalMargins{
 			Top:    1,
 			Bottom: 1,
 		},
@@ -395,10 +381,12 @@ func main() {
 
 	var margins ascii.Margins
 	if *wide {
+		margins = baseWideMargins
+
 		if *colorfulBoard {
-			margins = extraWideMargins
+			margins.Piece = extraWidePieceMargins
 		} else {
-			margins = wideMargins
+			margins.Piece = widePieceMargins
 		}
 	}
 
