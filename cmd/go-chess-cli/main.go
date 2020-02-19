@@ -59,23 +59,16 @@ var (
 			Bottom: 1,
 		},
 	}
-
-	pieceColorsCodes = map[models.Color]int{
-		models.Black: 34, // blue
-		models.White: 31, // red
-	}
-	squareColorsCodes = map[models.Color]int{
-		models.Black: 40, // black
-		models.White: 47, // white
-	}
 )
+
+type colorCodeGroup map[models.Color]int
 
 func setTTYMode(mode int) string {
 	return fmt.Sprintf("\x1b[%dm", mode)
 }
 
 func makeColorizer(
-	colorsCodes map[models.Color]int,
+	colorsCodes colorCodeGroup,
 ) ascii.Colorizer {
 	return func(
 		text string,
@@ -284,8 +277,8 @@ func main() {
 		"board in FEN "+
 			"(default: Gardner's minichess)",
 	)
-	color := flag.String(
-		"color",
+	humanColor := flag.String(
+		"humanColor",
 		"random",
 		"human color "+
 			"(allowed: random, black, white)",
@@ -311,10 +304,40 @@ func main() {
 		true,
 		"use colors to display pieces",
 	)
+	pieceBlackColor := flag.Int(
+		"pieceBlackColor",
+		34, // blue
+		"SGR parameter "+
+			"for ANSI escape sequences "+
+			"for setting a color of black pieces",
+	)
+	pieceWhiteColor := flag.Int(
+		"pieceWhiteColor",
+		31, // red
+		"SGR parameter "+
+			"for ANSI escape sequences "+
+			"for setting a color of white pieces",
+	)
 	colorfulBoard := flag.Bool(
 		"colorfulBoard",
 		true,
 		"use colors to display the board",
+	)
+	squareBlackColor := flag.Int(
+		"squareBlackColor",
+		40, // black
+		"SGR parameter "+
+			"for ANSI escape sequences "+
+			"for setting a color "+
+			"of black squares",
+	)
+	squareWhiteColor := flag.Int(
+		"squareWhiteColor",
+		47, // white
+		"SGR parameter "+
+			"for ANSI escape sequences "+
+			"for setting a color "+
+			"of white squares",
 	)
 	wide := flag.Bool(
 		"wide",
@@ -335,15 +358,15 @@ func main() {
 		)
 	}
 
-	parsedColor, err :=
-		ascii.DecodeColor(*color)
+	parsedHumanColor, err :=
+		ascii.DecodeColor(*humanColor)
 	switch {
 	case err == nil:
-	case *color == "random":
+	case *humanColor == "random":
 		if rand.Intn(2) == 0 {
-			parsedColor = models.Black
+			parsedHumanColor = models.Black
 		} else {
-			parsedColor = models.White
+			parsedHumanColor = models.White
 		}
 	default:
 		log.Fatal(
@@ -363,7 +386,10 @@ func main() {
 	}
 	if *colorfulPieces {
 		pieceColorizer :=
-			makeColorizer(pieceColorsCodes)
+			makeColorizer(colorCodeGroup{
+				models.Black: *pieceBlackColor,
+				models.White: *pieceWhiteColor,
+			})
 		basePieceEncoder := pieceEncoder
 		pieceEncoder = func(
 			piece models.Piece,
@@ -393,7 +419,10 @@ func main() {
 	var squareColorizer ascii.OptionalColorizer
 	if *colorfulBoard {
 		baseSquareColorizer :=
-			makeColorizer(squareColorsCodes)
+			makeColorizer(colorCodeGroup{
+				models.Black: *squareBlackColor,
+				models.White: *squareWhiteColor,
+			})
 		squareColorizer =
 			ascii.NewOptionalColorizer(
 				baseSquareColorizer,
@@ -402,7 +431,8 @@ func main() {
 		squareColorizer = ascii.WithoutColor
 	}
 
-	side := climodels.NewSide(parsedColor)
+	side :=
+		climodels.NewSide(parsedHumanColor)
 	reader := bufio.NewReader(os.Stdin)
 	storageEncoder :=
 		ascii.NewPieceStorageEncoder(
@@ -410,7 +440,7 @@ func main() {
 			placeholder,
 			margins,
 			squareColorizer,
-			parsedColor.Negative(),
+			parsedHumanColor.Negative(),
 			1,
 		)
 	cache := caches.NewParallelCache(
@@ -429,7 +459,7 @@ loop:
 				reader,
 				storageEncoder,
 				storage,
-				parsedColor,
+				parsedHumanColor,
 				side,
 			)
 		case climodels.Searcher:
@@ -437,7 +467,7 @@ loop:
 				cache,
 				storageEncoder,
 				storage,
-				parsedColor.Negative(),
+				parsedHumanColor.Negative(),
 				side,
 				*deep,
 				*duration,
