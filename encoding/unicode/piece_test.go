@@ -19,15 +19,11 @@ func (piece MockPiece) Color() models.Color {
 	return piece.color
 }
 
-func (
-	piece MockPiece,
-) Position() models.Position {
+func (piece MockPiece) Position() models.Position {
 	panic("not implemented")
 }
 
-func (piece MockPiece) ApplyPosition(
-	position models.Position,
-) models.Piece {
+func (piece MockPiece) ApplyPosition(position models.Position) models.Piece {
 	panic("not implemented")
 }
 
@@ -35,10 +31,6 @@ func (piece MockPiece) CheckMove(
 	move models.Move,
 	storage models.PieceStorage,
 ) bool {
-	panic("not implemented")
-}
-
-func (piece MockPiece) String() string {
 	panic("not implemented")
 }
 
@@ -52,7 +44,7 @@ func TestEncodePiece(test *testing.T) {
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			args: args{
 				piece: MockPiece{
 					kind:  models.King,
@@ -61,7 +53,7 @@ func TestEncodePiece(test *testing.T) {
 			},
 			want: "\u2654",
 		},
-		data{
+		{
 			args: args{
 				piece: MockPiece{
 					kind:  models.Queen,
