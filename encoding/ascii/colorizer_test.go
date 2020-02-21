@@ -19,25 +19,21 @@ func TestWithoutColor(test *testing.T) {
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			args: args{
-				text: "test",
-				color: climodels.NewOptionalColor(
-					models.Black,
-				),
+				text:  "test",
+				color: climodels.NewOptionalColor(models.Black),
 			},
 			want: "test",
 		},
-		data{
+		{
 			args: args{
-				text: "test",
-				color: climodels.NewOptionalColor(
-					models.White,
-				),
+				text:  "test",
+				color: climodels.NewOptionalColor(models.White),
 			},
 			want: "test",
 		},
-		data{
+		{
 			args: args{
 				text:  "test",
 				color: climodels.WithoutColor,
@@ -45,10 +41,7 @@ func TestWithoutColor(test *testing.T) {
 			want: "test",
 		},
 	} {
-		got := WithoutColor(
-			data.args.text,
-			data.args.color,
-		)
+		got := WithoutColor(data.args.text, data.args.color)
 
 		if got != data.want {
 			test.Fail()
@@ -56,9 +49,7 @@ func TestWithoutColor(test *testing.T) {
 	}
 }
 
-func TestNewOptionalColorizer(
-	test *testing.T,
-) {
+func TestNewOptionalColorizer(test *testing.T) {
 	type fields struct {
 		colorizer Colorizer
 	}
@@ -73,12 +64,9 @@ func TestNewOptionalColorizer(
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			fields: fields{
-				colorizer: func(
-					text string,
-					color models.Color,
-				) string {
+				colorizer: func(text string, color models.Color) string {
 					if text != "test" {
 						test.Fail()
 					}
@@ -86,27 +74,18 @@ func TestNewOptionalColorizer(
 						test.Fail()
 					}
 
-					return fmt.Sprintf(
-						"(%s:%s)",
-						EncodeColor(color),
-						text,
-					)
+					return fmt.Sprintf("(%s:%s)", EncodeColor(color), text)
 				},
 			},
 			args: args{
-				text: "test",
-				color: climodels.NewOptionalColor(
-					models.Black,
-				),
+				text:  "test",
+				color: climodels.NewOptionalColor(models.Black),
 			},
 			want: "(black:test)",
 		},
-		data{
+		{
 			fields: fields{
-				colorizer: func(
-					text string,
-					color models.Color,
-				) string {
+				colorizer: func(text string, color models.Color) string {
 					if text != "test" {
 						test.Fail()
 					}
@@ -114,27 +93,18 @@ func TestNewOptionalColorizer(
 						test.Fail()
 					}
 
-					return fmt.Sprintf(
-						"(%s:%s)",
-						EncodeColor(color),
-						text,
-					)
+					return fmt.Sprintf("(%s:%s)", EncodeColor(color), text)
 				},
 			},
 			args: args{
-				text: "test",
-				color: climodels.NewOptionalColor(
-					models.White,
-				),
+				text:  "test",
+				color: climodels.NewOptionalColor(models.White),
 			},
 			want: "(white:test)",
 		},
-		data{
+		{
 			fields: fields{
-				colorizer: func(
-					text string,
-					color models.Color,
-				) string {
+				colorizer: func(text string, color models.Color) string {
 					panic("not implemented")
 				},
 			},
@@ -145,13 +115,8 @@ func TestNewOptionalColorizer(
 			want: "test",
 		},
 	} {
-		colorizer := NewOptionalColorizer(
-			data.fields.colorizer,
-		)
-		got := colorizer(
-			data.args.text,
-			data.args.color,
-		)
+		colorizer := NewOptionalColorizer(data.fields.colorizer)
+		got := colorizer(data.args.text, data.args.color)
 
 		if got != data.want {
 			test.Fail()

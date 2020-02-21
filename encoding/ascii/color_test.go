@@ -17,30 +17,28 @@ func TestDecodeColor(test *testing.T) {
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			args:      args{"black"},
 			wantColor: models.Black,
 			wantErr:   false,
 		},
-		data{
+		{
 			args:      args{"white"},
 			wantColor: models.White,
 			wantErr:   false,
 		},
-		data{
+		{
 			args:      args{"incorrect"},
 			wantColor: 0,
 			wantErr:   true,
 		},
 	} {
-		gotColor, gotErr :=
-			DecodeColor(data.args.text)
+		gotColor, gotErr := DecodeColor(data.args.text)
 
 		if gotColor != data.wantColor {
 			test.Fail()
 		}
-		hasErr := gotErr != nil
-		if hasErr != data.wantErr {
+		if hasErr := gotErr != nil; hasErr != data.wantErr {
 			test.Fail()
 		}
 	}
@@ -56,11 +54,11 @@ func TestEncodeColor(test *testing.T) {
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			args: args{models.Black},
 			want: "black",
 		},
-		data{
+		{
 			args: args{models.White},
 			want: "white",
 		},

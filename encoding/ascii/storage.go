@@ -9,9 +9,7 @@ import (
 )
 
 // PieceEncoder ...
-type PieceEncoder func(
-	piece models.Piece,
-) string
+type PieceEncoder func(piece models.Piece) string
 
 // PieceStorageEncoder ...
 type PieceStorageEncoder struct {
@@ -43,9 +41,7 @@ func NewPieceStorageEncoder(
 }
 
 // EncodePieceStorage ...
-func (
-	encoder PieceStorageEncoder,
-) EncodePieceStorage(
+func (encoder PieceStorageEncoder) EncodePieceStorage(
 	storage models.PieceStorage,
 ) string {
 	pieceMargins := encoder.margins.Piece
@@ -53,10 +49,9 @@ func (
 
 	var ranks []string
 	var currentRank string
-	positions := storage.Size().Positions()
 	startedColor := models.Black
 	currentColor := startedColor
-	for _, position := range positions {
+	for _, position := range storage.Size().Positions() {
 		if len(currentRank) == 0 {
 			currentRank += encoder.wrapWithSpaces(
 				strconv.Itoa(position.Rank+1),
@@ -75,15 +70,11 @@ func (
 		currentRank += encoder.wrapWithSpaces(
 			encodedPiece,
 			pieceMargins.HorizontalMargins,
-			climodels.NewOptionalColor(
-				currentColor,
-			),
+			climodels.NewOptionalColor(currentColor),
 		)
 
 		currentColor = currentColor.Negative()
-
-		lastFile := storage.Size().Height - 1
-		if position.File == lastFile {
+		if lastFile := storage.Size().Height - 1; position.File == lastFile {
 			ranks = append(ranks, currentRank)
 			currentRank = ""
 
@@ -98,40 +89,29 @@ func (
 	var sparseRanks []string
 	for _, rank := range ranks {
 		startedColor = startedColor.Negative()
-		sparseRanks = append(
-			sparseRanks,
-			encoder.wrapWithEmptyLines(
-				[]string{rank},
-				storage.Size().Width,
-				pieceMargins.VerticalMargins,
-				climodels.NewOptionalColor(
-					startedColor,
-				),
-			)...,
-		)
+		sparseRanks = append(sparseRanks, encoder.wrapWithEmptyLines(
+			[]string{rank},
+			storage.Size().Width,
+			pieceMargins.VerticalMargins,
+			climodels.NewOptionalColor(startedColor),
+		)...)
 	}
 
-	legendRank := encoder.spaces(
-		legendMargins.Rank.Width(1),
-		climodels.WithoutColor,
-	)
-	width := storage.Size().Width
-	for i := 0; i < width; i++ {
+	legendRank :=
+		encoder.spaces(legendMargins.Rank.Width(1), climodels.WithoutColor)
+	for i := 0; i < storage.Size().Width; i++ {
 		legendRank += encoder.wrapWithSpaces(
 			string(i+97),
 			pieceMargins.HorizontalMargins,
 			climodels.WithoutColor,
 		)
 	}
-	sparseRanks = append(
-		sparseRanks,
-		encoder.wrapWithEmptyLines(
-			[]string{legendRank},
-			storage.Size().Width,
-			legendMargins.File,
-			climodels.WithoutColor,
-		)...,
-	)
+	sparseRanks = append(sparseRanks, encoder.wrapWithEmptyLines(
+		[]string{legendRank},
+		storage.Size().Width,
+		legendMargins.File,
+		climodels.WithoutColor,
+	)...)
 
 	sparseRanks = encoder.wrapWithEmptyLines(
 		sparseRanks,
@@ -143,24 +123,18 @@ func (
 	return strings.Join(sparseRanks, "\n")
 }
 
-func (
-	encoder PieceStorageEncoder,
-) wrapWithSpaces(
+func (encoder PieceStorageEncoder) wrapWithSpaces(
 	text string,
 	margins HorizontalMargins,
 	color climodels.OptionalColor,
 ) string {
-	prefix :=
-		encoder.spaces(margins.Left, color)
-	suffix :=
-		encoder.spaces(margins.Right, color)
+	prefix := encoder.spaces(margins.Left, color)
+	suffix := encoder.spaces(margins.Right, color)
 	text = encoder.colorizer(text, color)
 	return prefix + text + suffix
 }
 
-func (
-	encoder PieceStorageEncoder,
-) spaces(
+func (encoder PieceStorageEncoder) spaces(
 	length int,
 	color climodels.OptionalColor,
 ) string {
@@ -172,76 +146,52 @@ func (
 	return encoder.colorizer(text, color)
 }
 
-func (
-	encoder PieceStorageEncoder,
-) wrapWithEmptyLines(
+func (encoder PieceStorageEncoder) wrapWithEmptyLines(
 	lines []string,
 	width int,
 	margins VerticalMargins,
 	startedColor climodels.OptionalColor,
 ) []string {
 	var wrappedLines []string
-	wrappedLines = append(
-		wrappedLines,
-		encoder.emptyLines(
-			margins.Top,
-			width,
-			startedColor,
-		)...,
-	)
-	wrappedLines = append(
-		wrappedLines,
-		lines...,
-	)
-	wrappedLines = append(
-		wrappedLines,
-		encoder.emptyLines(
-			margins.Bottom,
-			width,
-			startedColor,
-		)...,
-	)
+	wrappedLines = append(wrappedLines, encoder.emptyLines(
+		margins.Top,
+		width,
+		startedColor,
+	)...)
+	wrappedLines = append(wrappedLines, lines...)
+	wrappedLines = append(wrappedLines, encoder.emptyLines(
+		margins.Bottom,
+		width,
+		startedColor,
+	)...)
 
 	return wrappedLines
 }
 
-func (
-	encoder PieceStorageEncoder,
-) emptyLines(
+func (encoder PieceStorageEncoder) emptyLines(
 	count int,
 	width int,
 	startedColor climodels.OptionalColor,
 ) []string {
 	var lines []string
 	for i := 0; i < count; i++ {
-		line :=
-			encoder.emptyLine(width, startedColor)
+		line := encoder.emptyLine(width, startedColor)
 		lines = append(lines, line)
 	}
 
 	return lines
 }
 
-func (
-	encoder PieceStorageEncoder,
-) emptyLine(
+func (encoder PieceStorageEncoder) emptyLine(
 	width int,
 	startedColor climodels.OptionalColor,
 ) string {
 	pieceMargins := encoder.margins.Piece
 	legendMargins := encoder.margins.Legend
 
-	line := encoder.spaces(
-		legendMargins.Rank.Width(1),
-		climodels.WithoutColor,
-	)
-	currentColor := startedColor
-	for i := 0; i < width; i++ {
-		line += encoder.spaces(
-			pieceMargins.
-				Width(encoder.pieceWidth),
-			currentColor,
-		)
+	line := encoder.spaces(legendMargins.Rank.Width(1), climodels.WithoutColor)
+	for i, currentColor := 0, startedColor; i < width; i++ {
+		line += encoder.spaces(pieceMargins.Width(encoder.pieceWidth), currentColor)
 		currentColor = currentColor.Negative()
 	}
 
@@ -251,8 +201,7 @@ func (
 func reverse(strings []string) {
 	left, right := 0, len(strings)-1
 	for left < right {
-		strings[left], strings[right] =
-			strings[right], strings[left]
+		strings[left], strings[right] = strings[right], strings[left]
 		left, right = left+1, right-1
 	}
 }

@@ -7,9 +7,7 @@ import (
 )
 
 // DecodeColor ...
-func DecodeColor(
-	text string,
-) (models.Color, error) {
+func DecodeColor(text string) (models.Color, error) {
 	var color models.Color
 	switch text {
 	case "black":
@@ -24,9 +22,7 @@ func DecodeColor(
 }
 
 // EncodeColor ...
-func EncodeColor(
-	color models.Color,
-) string {
+func EncodeColor(color models.Color) string {
 	var text string
 	switch color {
 	case models.Black:

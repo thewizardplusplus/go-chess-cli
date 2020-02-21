@@ -13,13 +13,10 @@ import (
 )
 
 const (
-	kiwipete = "r3k2r/p1ppqpb1/bn2pnp1/3PN3" +
-		"/1p2P3/2N2Q1p/PPPBBPPP/R3K2R"
+	kiwipete = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R"
 )
 
-func TestNewPieceStorageEncoder(
-	test *testing.T,
-) {
+func TestNewPieceStorageEncoder(test *testing.T) {
 	margins := Margins{
 		Piece: PieceMargins{
 			HorizontalMargins: HorizontalMargins{
@@ -42,10 +39,7 @@ func TestNewPieceStorageEncoder(
 			},
 		},
 	}
-	colorizer := func(
-		text string,
-		color climodels.OptionalColor,
-	) string {
+	colorizer := func(text string, color climodels.OptionalColor) string {
 		panic("not implemented")
 	}
 	encoder := NewPieceStorageEncoder(
@@ -57,12 +51,8 @@ func TestNewPieceStorageEncoder(
 		2,
 	)
 
-	gotEncoder := reflect.
-		ValueOf(encoder.encoder).
-		Pointer()
-	wantEncoder := reflect.
-		ValueOf(uci.EncodePiece).
-		Pointer()
+	gotEncoder := reflect.ValueOf(encoder.encoder).Pointer()
+	wantEncoder := reflect.ValueOf(uci.EncodePiece).Pointer()
 	if gotEncoder != wantEncoder {
 		test.Fail()
 	}
@@ -71,19 +61,12 @@ func TestNewPieceStorageEncoder(
 		test.Fail()
 	}
 
-	if !reflect.DeepEqual(
-		encoder.margins,
-		margins,
-	) {
+	if !reflect.DeepEqual(encoder.margins, margins) {
 		test.Fail()
 	}
 
-	gotColorizer := reflect.
-		ValueOf(encoder.colorizer).
-		Pointer()
-	wantColorizer := reflect.
-		ValueOf(colorizer).
-		Pointer()
+	gotColorizer := reflect.ValueOf(encoder.colorizer).Pointer()
+	wantColorizer := reflect.ValueOf(colorizer).Pointer()
 	if gotColorizer != wantColorizer {
 		test.Fail()
 	}
@@ -97,9 +80,7 @@ func TestNewPieceStorageEncoder(
 	}
 }
 
-func TestPieceStorageEncoderEncodePieceStorage(
-	test *testing.T,
-) {
+func TestPieceStorageEncoderEncodePieceStorage(test *testing.T) {
 	type fields struct {
 		encoder     PieceEncoder
 		placeholder string
@@ -118,7 +99,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -140,7 +121,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"1RxxxKxxR\n" +
 				" abcdefgh",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -162,7 +143,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"8rxxxkxxr\n" +
 				" abcdefgh",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -191,7 +172,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"1 R   x   x   x   K   x   x   R  \n" +
 				"  a   b   c   d   e   f   g   h  ",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -244,7 +225,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -297,7 +278,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 9) + "\n" +
 				" abcdefgh",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -326,7 +307,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				" 1  RxxxKxxR\n" +
 				"    abcdefgh",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -358,7 +339,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 9) + "\n" +
 				strings.Repeat(" ", 9),
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -428,28 +409,20 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 4*9) + "\n" +
 				strings.Repeat(" ", 4*9),
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
 				margins:     Margins{},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
+				colorizer: func(text string, color climodels.OptionalColor) string {
 					var colorMark byte
 					if color.IsSet {
-						colorMark =
-							EncodeColor(color.Value)[0]
+						colorMark = EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
 
-					return fmt.Sprintf(
-						"(%c%s)",
-						colorMark,
-						text,
-					)
+					return fmt.Sprintf("(%c%s)", colorMark, text)
 				},
 				topColor:   models.Black,
 				pieceWidth: 1,
@@ -467,7 +440,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n1)(bR)(wx)(bx)(wx)(bK)(wx)(bx)(wR)\n" +
 				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -485,23 +458,15 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
+				colorizer: func(text string, color climodels.OptionalColor) string {
 					var colorMark byte
 					if color.IsSet {
-						colorMark =
-							EncodeColor(color.Value)[0]
+						colorMark = EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
 
-					return fmt.Sprintf(
-						"(%c%s)",
-						colorMark,
-						text,
-					)
+					return fmt.Sprintf("(%c%s)", colorMark, text)
 				},
 				topColor:   models.Black,
 				pieceWidth: 1,
@@ -519,7 +484,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n )(n1)(n )(b )(bR)(b )(w )(wx)(w )(b )(bx)(b )(w )(wx)(w )(b )(bK)(b )(w )(wx)(w )(b )(bx)(b )(w )(wR)(w )\n" +
 				"(n   )(n )(na)(n )(n )(nb)(n )(n )(nc)(n )(n )(nd)(n )(n )(ne)(n )(n )(nf)(n )(n )(ng)(n )(n )(nh)(n )",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -537,23 +502,15 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
+				colorizer: func(text string, color climodels.OptionalColor) string {
 					var colorMark byte
 					if color.IsSet {
-						colorMark =
-							EncodeColor(color.Value)[0]
+						colorMark = EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
 
-					return fmt.Sprintf(
-						"(%c%s)",
-						colorMark,
-						text,
-					)
+					return fmt.Sprintf("(%c%s)", colorMark, text)
 				},
 				topColor:   models.Black,
 				pieceWidth: 1,
@@ -589,7 +546,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n )(na)(nb)(nc)(nd)(ne)(nf)(ng)(nh)\n" +
 				"(n )(n )(n )(n )(n )(n )(n )(n )(n )",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -615,23 +572,15 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						},
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
+				colorizer: func(text string, color climodels.OptionalColor) string {
 					var colorMark byte
 					if color.IsSet {
-						colorMark =
-							EncodeColor(color.Value)[0]
+						colorMark = EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
 
-					return fmt.Sprintf(
-						"(%c%s)",
-						colorMark,
-						text,
-					)
+					return fmt.Sprintf("(%c%s)", colorMark, text)
 				},
 				topColor:   models.Black,
 				pieceWidth: 1,
@@ -667,7 +616,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				"(n   )(n )(na)(n )(n )(nb)(n )(n )(nc)(n )(n )(nd)(n )(n )(ne)(n )(n )(nf)(n )(n )(ng)(n )(n )(nh)(n )\n" +
 				"(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )(n   )",
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -697,7 +646,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 				strings.Repeat(" ", 9) + "\n" +
 				strings.Repeat(" ", 9),
 		},
-		data{
+		{
 			fields: fields{
 				encoder:     uci.EncodePiece,
 				placeholder: "x",
@@ -707,23 +656,15 @@ func TestPieceStorageEncoderEncodePieceStorage(
 						Bottom: 2,
 					},
 				},
-				colorizer: func(
-					text string,
-					color climodels.OptionalColor,
-				) string {
+				colorizer: func(text string, color climodels.OptionalColor) string {
 					var colorMark byte
 					if color.IsSet {
-						colorMark =
-							EncodeColor(color.Value)[0]
+						colorMark = EncodeColor(color.Value)[0]
 					} else {
 						colorMark = 'n'
 					}
 
-					return fmt.Sprintf(
-						"(%c%s)",
-						colorMark,
-						text,
-					)
+					return fmt.Sprintf("(%c%s)", colorMark, text)
 				},
 				topColor:   models.Black,
 				pieceWidth: 1,
@@ -763,8 +704,7 @@ func TestPieceStorageEncoderEncodePieceStorage(
 			topColor:    data.fields.topColor,
 			pieceWidth:  data.fields.pieceWidth,
 		}
-		got :=
-			encoder.EncodePieceStorage(storage)
+		got := encoder.EncodePieceStorage(storage)
 
 		if got != data.want {
 			test.Fail()

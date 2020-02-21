@@ -4,9 +4,7 @@ import (
 	"testing"
 )
 
-func TestHorizontalMarginsWidth(
-	test *testing.T,
-) {
+func TestHorizontalMarginsWidth(test *testing.T) {
 	type fields struct {
 		left  int
 		right int
@@ -21,12 +19,12 @@ func TestHorizontalMarginsWidth(
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			fields: fields{2, 3},
 			args:   args{0},
 			want:   5,
 		},
-		data{
+		{
 			fields: fields{2, 3},
 			args:   args{4},
 			want:   9,
@@ -36,8 +34,7 @@ func TestHorizontalMarginsWidth(
 			Left:  data.fields.left,
 			Right: data.fields.right,
 		}
-		got :=
-			margins.Width(data.args.contentWidth)
+		got := margins.Width(data.args.contentWidth)
 
 		if got != data.want {
 			test.Fail()

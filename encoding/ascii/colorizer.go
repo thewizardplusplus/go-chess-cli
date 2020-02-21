@@ -6,33 +6,19 @@ import (
 )
 
 // Colorizer ...
-type Colorizer func(
-	text string,
-	color models.Color,
-) string
+type Colorizer func(text string, color models.Color) string
 
 // OptionalColorizer ...
-type OptionalColorizer func(
-	text string,
-	color climodels.OptionalColor,
-) string
+type OptionalColorizer func(text string, color climodels.OptionalColor) string
 
 // WithoutColor ...
-func WithoutColor(
-	text string,
-	color climodels.OptionalColor,
-) string {
+func WithoutColor(text string, color climodels.OptionalColor) string {
 	return text
 }
 
 // NewOptionalColorizer ...
-func NewOptionalColorizer(
-	colorizer Colorizer,
-) OptionalColorizer {
-	return func(
-		text string,
-		color climodels.OptionalColor,
-	) string {
+func NewOptionalColorizer(colorizer Colorizer) OptionalColorizer {
+	return func(text string, color climodels.OptionalColor) string {
 		if !color.IsSet {
 			return text
 		}

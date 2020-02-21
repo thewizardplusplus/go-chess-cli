@@ -7,12 +7,8 @@ type HorizontalMargins struct {
 }
 
 // Width ...
-func (margins HorizontalMargins) Width(
-	contentWidth int,
-) int {
-	return margins.Left +
-		margins.Right +
-		contentWidth
+func (margins HorizontalMargins) Width(contentWidth int) int {
+	return margins.Left + margins.Right + contentWidth
 }
 
 // VerticalMargins ...
