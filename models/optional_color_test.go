@@ -18,9 +18,7 @@ func TestNewOptionalColor(test *testing.T) {
 	}
 }
 
-func TestOptionalColorNegative(
-	test *testing.T,
-) {
+func TestOptionalColorNegative(test *testing.T) {
 	type fields struct {
 		value models.Color
 		isSet bool
@@ -31,21 +29,21 @@ func TestOptionalColorNegative(
 	}
 
 	for _, data := range []data{
-		data{
+		{
 			fields: fields{models.Black, true},
 			want: OptionalColor{
 				Value: models.White,
 				IsSet: true,
 			},
 		},
-		data{
+		{
 			fields: fields{models.White, true},
 			want: OptionalColor{
 				Value: models.Black,
 				IsSet: true,
 			},
 		},
-		data{
+		{
 			fields: fields{isSet: false},
 			want:   WithoutColor,
 		},

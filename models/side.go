@@ -15,8 +15,7 @@ const (
 
 // NewSide ...
 //
-// It detects an initial side
-// by a human color.
+// It detects an initial side by a human color.
 func NewSide(color models.Color) Side {
 	var side Side
 	switch color {

@@ -10,20 +10,18 @@ type OptionalColor struct {
 	IsSet bool
 }
 
-// WithoutColor ...
-var WithoutColor OptionalColor
+// ...
+var (
+	WithoutColor OptionalColor
+)
 
 // NewOptionalColor ...
-func NewOptionalColor(
-	color models.Color,
-) OptionalColor {
+func NewOptionalColor(color models.Color) OptionalColor {
 	return OptionalColor{color, true}
 }
 
 // Negative ...
-func (
-	color OptionalColor,
-) Negative() OptionalColor {
+func (color OptionalColor) Negative() OptionalColor {
 	if !color.IsSet {
 		return WithoutColor
 	}
