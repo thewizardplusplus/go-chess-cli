@@ -13,4 +13,4 @@ $ go get github.com/thewizardplusplus/go-chess-cli/...
 
 The MIT License (MIT)
 
-Copyright &copy; 2019 thewizardplusplus
+Copyright &copy; 2019-2020 thewizardplusplus
