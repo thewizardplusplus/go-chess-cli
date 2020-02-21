@@ -67,16 +67,9 @@ func setTTYMode(mode int) string {
 	return fmt.Sprintf("\x1b[%dm", mode)
 }
 
-func makeColorizer(
-	colorsCodes colorCodeGroup,
-) ascii.Colorizer {
-	return func(
-		text string,
-		color models.Color,
-	) string {
-		return setTTYMode(colorsCodes[color]) +
-			text +
-			setTTYMode(0)
+func makeColorizer(colorsCodes colorCodeGroup) ascii.Colorizer {
+	return func(text string, color models.Color) string {
+		return setTTYMode(colorsCodes[color]) + text + setTTYMode(0)
 	}
 }
 
@@ -90,31 +83,20 @@ func search(
 		terminator,
 		runtime.NumCPU(),
 		func() minimax.MoveSearcher {
-			innerSearcher :=
-				minimax.NewAlphaBetaSearcher(
-					models.MoveGenerator{},
-					// terminator will be set
-					// automatically
-					// by the iterative searcher
-					nil,
-					evaluators.MaterialEvaluator{},
-				)
+			innerSearcher := minimax.NewAlphaBetaSearcher(
+				models.MoveGenerator{},
+				nil, // terminator will be set automatically by the iterative searcher
+				evaluators.MaterialEvaluator{},
+			)
 
 			if cache != nil {
-				// make and bind a cached searcher
-				// to inner one
-				minimax.NewCachedSearcher(
-					innerSearcher,
-					cache,
-				)
+				// make and bind a cached searcher to inner one
+				minimax.NewCachedSearcher(innerSearcher, cache)
 			}
 
 			return minimax.NewIterativeSearcher(
 				innerSearcher,
-				// terminator will be set
-				// automatically
-				// by the parallel searcher
-				nil,
+				nil, // terminator will be set automatically by the parallel searcher
 			)
 		},
 	)
@@ -127,14 +109,9 @@ func search(
 	)
 }
 
-func check(
-	storage models.PieceStorage,
-	color models.Color,
-) error {
-	// minimal deep, at which a game state
-	// will be detected
-	terminator :=
-		terminators.NewDeepTerminator(1)
+func check(storage models.PieceStorage, color models.Color) error {
+	// minimal deep, at which a game state will be detected
+	terminator := terminators.NewDeepTerminator(1)
 	_, err := search(
 		nil, // without a cache
 		storage,
@@ -150,12 +127,10 @@ func writePrompt(
 	color models.Color,
 	side climodels.Side,
 ) error {
-	text := storageEncoder.
-		EncodePieceStorage(storage)
+	text := storageEncoder.EncodePieceStorage(storage)
 	fmt.Println(text)
 
-	err := check(storage, color)
-	if err != nil {
+	if err := check(storage, color); err != nil {
 		return err // don't wrap
 	}
 
@@ -165,8 +140,7 @@ func writePrompt(
 	}
 
 	text = ascii.EncodeColor(color)
-	// don't break the line
-	fmt.Printf("%s> %s", text, mark)
+	fmt.Printf("%s> %s", text, mark) // don't break the line
 
 	return nil
 }
@@ -178,55 +152,33 @@ func readMove(
 	color models.Color,
 	side climodels.Side,
 ) (models.Move, error) {
-	err := writePrompt(
-		storageEncoder,
-		storage,
-		color,
-		side,
-	)
-	if err != nil {
+	if err := writePrompt(storageEncoder, storage, color, side); err != nil {
 		return models.Move{}, err // don't wrap
 	}
 
 	text, err := reader.ReadString('\n')
 	if err != nil && err != io.EOF {
-		return models.Move{}, fmt.Errorf(
-			"unable to read the move: %s",
-			err,
-		)
+		return models.Move{}, fmt.Errorf("unable to read the move: %s", err)
 	}
 
 	text = strings.TrimSuffix(text, "\n")
 	move, err := uci.DecodeMove(text)
 	if err != nil {
-		return models.Move{}, fmt.Errorf(
-			"unable to decode the move: %s",
-			err,
-		)
+		return models.Move{}, fmt.Errorf("unable to decode the move: %s", err)
 	}
 
-	err = storage.CheckMove(move)
-	if err != nil {
-		return models.Move{}, fmt.Errorf(
-			"incorrect move: %s",
-			err,
-		)
+	if err = storage.CheckMove(move); err != nil {
+		return models.Move{}, fmt.Errorf("incorrect move: %s", err)
 	}
 
-	piece, _ := storage.Piece(move.Start)
-	if piece.Color() != color {
-		return models.Move{}, errors.New(
-			"incorrect move: opponent piece",
-		)
+	if piece, _ := storage.Piece(move.Start); piece.Color() != color {
+		return models.Move{}, errors.New("incorrect move: opponent piece")
 	}
 
 	nextStorage := storage.ApplyMove(move)
 	nextColor := color.Negative()
-	err = check(nextStorage, nextColor)
-	if err == models.ErrKingCapture {
-		return models.Move{}, errors.New(
-			"incorrect move: check",
-		)
+	if err = check(nextStorage, nextColor); err == models.ErrKingCapture {
+		return models.Move{}, errors.New("incorrect move: check")
 	}
 
 	return move, nil
@@ -241,30 +193,15 @@ func searchMove(
 	deep int,
 	duration time.Duration,
 ) (models.Move, error) {
-	err := writePrompt(
-		storageEncoder,
-		storage,
-		color,
-		side,
-	)
-	if err != nil {
+	if err := writePrompt(storageEncoder, storage, color, side); err != nil {
 		return models.Move{}, err // don't wrap
 	}
 
-	terminator :=
-		terminators.NewGroupTerminator(
-			terminators.NewDeepTerminator(deep),
-			terminators.NewTimeTerminator(
-				time.Now,
-				duration,
-			),
-		)
-	move, _ := search(
-		cache,
-		storage,
-		color,
-		terminator,
+	terminator := terminators.NewGroupTerminator(
+		terminators.NewDeepTerminator(deep),
+		terminators.NewTimeTerminator(time.Now, duration),
 	)
+	move, _ := search(cache, storage, color, terminator)
 	return move.Move, nil
 }
 
@@ -274,14 +211,12 @@ func main() {
 	fen := flag.String(
 		"fen",
 		"rnbqk/ppppp/5/PPPPP/RNBQK",
-		"board in FEN "+
-			"(default: Gardner's minichess)",
+		"board in FEN (default: Gardner's minichess)",
 	)
 	humanColor := flag.String(
 		"humanColor",
 		"random",
-		"human color "+
-			"(allowed: random, black, white)",
+		"human color (allowed: random, black, white)",
 	)
 	deep := flag.Int("deep", 5, "search deep")
 	duration := flag.Duration(
@@ -289,16 +224,8 @@ func main() {
 		5*time.Second,
 		"search duration (e.g. 72h3m0.5s)",
 	)
-	cacheSize := flag.Int(
-		"cacheSize",
-		1e6,
-		"maximal cache size (in items)",
-	)
-	useUnicode := flag.Bool(
-		"unicode",
-		true,
-		"use Unicode to display pieces",
-	)
+	cacheSize := flag.Int("cacheSize", 1e6, "maximal cache size (in items)")
+	useUnicode := flag.Bool("unicode", true, "use Unicode to display pieces")
 	colorfulPieces := flag.Bool(
 		"colorfulPieces",
 		true,
@@ -307,16 +234,12 @@ func main() {
 	pieceBlackColor := flag.Int(
 		"pieceBlackColor",
 		34, // blue
-		"SGR parameter "+
-			"for ANSI escape sequences "+
-			"for setting a color of black pieces",
+		"SGR parameter for ANSI escape sequences for setting a color of black pieces",
 	)
 	pieceWhiteColor := flag.Int(
 		"pieceWhiteColor",
 		31, // red
-		"SGR parameter "+
-			"for ANSI escape sequences "+
-			"for setting a color of white pieces",
+		"SGR parameter for ANSI escape sequences for setting a color of white pieces",
 	)
 	colorfulBoard := flag.Bool(
 		"colorfulBoard",
@@ -326,40 +249,24 @@ func main() {
 	squareBlackColor := flag.Int(
 		"squareBlackColor",
 		40, // black
-		"SGR parameter "+
-			"for ANSI escape sequences "+
-			"for setting a color "+
-			"of black squares",
+		"SGR parameter for ANSI escape sequences "+
+			"for setting a color of black squares",
 	)
 	squareWhiteColor := flag.Int(
 		"squareWhiteColor",
 		47, // white
-		"SGR parameter "+
-			"for ANSI escape sequences "+
-			"for setting a color "+
-			"of white squares",
+		"SGR parameter for ANSI escape sequences "+
+			"for setting a color of white squares",
 	)
-	wide := flag.Bool(
-		"wide",
-		true,
-		"display the board wide",
-	)
+	wide := flag.Bool("wide", true, "display the board wide")
 	flag.Parse()
 
-	storage, err := uci.DecodePieceStorage(
-		*fen,
-		pieces.NewPiece,
-		models.NewBoard,
-	)
+	storage, err := uci.DecodePieceStorage(*fen, pieces.NewPiece, models.NewBoard)
 	if err != nil {
-		log.Fatal(
-			"unable to decode the board: ",
-			err,
-		)
+		log.Fatal("unable to decode the board: ", err)
 	}
 
-	parsedHumanColor, err :=
-		ascii.DecodeColor(*humanColor)
+	parsedHumanColor, err := ascii.DecodeColor(*humanColor)
 	switch {
 	case err == nil:
 	case *humanColor == "random":
@@ -369,10 +276,7 @@ func main() {
 			parsedHumanColor = models.White
 		}
 	default:
-		log.Fatal(
-			"unable to decode the color: ",
-			err,
-		)
+		log.Fatal("unable to decode the color: ", err)
 	}
 
 	var pieceEncoder ascii.PieceEncoder
@@ -385,20 +289,14 @@ func main() {
 		placeholder = "."
 	}
 	if *colorfulPieces {
-		pieceColorizer :=
-			makeColorizer(colorCodeGroup{
-				models.Black: *pieceBlackColor,
-				models.White: *pieceWhiteColor,
-			})
+		pieceColorizer := makeColorizer(colorCodeGroup{
+			models.Black: *pieceBlackColor,
+			models.White: *pieceWhiteColor,
+		})
 		basePieceEncoder := pieceEncoder
-		pieceEncoder = func(
-			piece models.Piece,
-		) string {
+		pieceEncoder = func(piece models.Piece) string {
 			text := basePieceEncoder(piece)
-			return pieceColorizer(
-				text,
-				piece.Color(),
-			)
+			return pieceColorizer(text, piece.Color())
 		}
 	}
 	if *colorfulBoard {
@@ -418,50 +316,36 @@ func main() {
 
 	var squareColorizer ascii.OptionalColorizer
 	if *colorfulBoard {
-		baseSquareColorizer :=
-			makeColorizer(colorCodeGroup{
-				models.Black: *squareBlackColor,
-				models.White: *squareWhiteColor,
-			})
-		squareColorizer =
-			ascii.NewOptionalColorizer(
-				baseSquareColorizer,
-			)
+		baseSquareColorizer := makeColorizer(colorCodeGroup{
+			models.Black: *squareBlackColor,
+			models.White: *squareWhiteColor,
+		})
+		squareColorizer = ascii.NewOptionalColorizer(baseSquareColorizer)
 	} else {
 		squareColorizer = ascii.WithoutColor
 	}
 
-	side :=
-		climodels.NewSide(parsedHumanColor)
+	side := climodels.NewSide(parsedHumanColor)
 	reader := bufio.NewReader(os.Stdin)
-	storageEncoder :=
-		ascii.NewPieceStorageEncoder(
-			pieceEncoder,
-			placeholder,
-			margins,
-			squareColorizer,
-			parsedHumanColor.Negative(),
-			1,
-		)
-	cache := caches.NewParallelCache(
-		caches.NewStringHashingCache(
-			*cacheSize,
-			uci.EncodePieceStorage,
-		),
+	storageEncoder := ascii.NewPieceStorageEncoder(
+		pieceEncoder,
+		placeholder,
+		margins,
+		squareColorizer,
+		parsedHumanColor.Negative(),
+		1,
 	)
+	cache := caches.NewParallelCache(caches.NewStringHashingCache(
+		*cacheSize,
+		uci.EncodePieceStorage,
+	))
 loop:
 	for {
 		var move models.Move
 		var err error
 		switch side {
 		case climodels.Human:
-			move, err = readMove(
-				reader,
-				storageEncoder,
-				storage,
-				parsedHumanColor,
-				side,
-			)
+			move, err = readMove(reader, storageEncoder, storage, parsedHumanColor, side)
 		case climodels.Searcher:
 			move, err = searchMove(
 				cache,
@@ -479,8 +363,7 @@ loop:
 		}
 		switch err {
 		case nil:
-		case minimax.ErrCheckmate,
-			minimax.ErrDraw:
+		case minimax.ErrCheckmate, minimax.ErrDraw:
 			log.Print("game in the state: ", err)
 			break loop
 		default:
