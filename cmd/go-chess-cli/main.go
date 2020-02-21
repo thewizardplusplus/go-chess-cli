@@ -26,6 +26,7 @@ import (
 	"github.com/thewizardplusplus/go-chess-models/pieces"
 )
 
+// nolint: gochecknoglobals
 var (
 	baseWideMargins = ascii.Margins{
 		Legend: ascii.LegendMargins{
@@ -201,7 +202,7 @@ func searchMove(
 		terminators.NewDeepTerminator(deep),
 		terminators.NewTimeTerminator(time.Now, duration),
 	)
-	move, _ := search(cache, storage, color, terminator)
+	move, _ := search(cache, storage, color, terminator) // nolint: gosec
 	return move.Move, nil
 }
 

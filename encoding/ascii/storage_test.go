@@ -474,6 +474,7 @@ func TestPieceStorageEncoderEncodePieceStorage(test *testing.T) {
 			args: args{
 				boardInFEN: kiwipete,
 			},
+			// nolint: lll
 			want: "(n )(n8)(n )(w )(wr)(w )(b )(bx)(b )(w )(wx)(w )(b )(bx)(b )(w )(wk)(w )(b )(bx)(b )(w )(wx)(w )(b )(br)(b )\n" +
 				"(n )(n7)(n )(b )(bp)(b )(w )(wx)(w )(b )(bp)(b )(w )(wp)(w )(b )(bq)(b )(w )(wp)(w )(b )(bb)(b )(w )(wx)(w )\n" +
 				"(n )(n6)(n )(w )(wb)(w )(b )(bn)(b )(w )(wx)(w )(b )(bx)(b )(w )(wp)(w )(b )(bn)(b )(w )(wp)(w )(b )(bx)(b )\n" +
@@ -588,6 +589,7 @@ func TestPieceStorageEncoderEncodePieceStorage(test *testing.T) {
 			args: args{
 				boardInFEN: kiwipete,
 			},
+			// nolint: lll
 			want: "(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +
 				"(n )(n8)(n )(w )(wr)(w )(b )(bx)(b )(w )(wx)(w )(b )(bx)(b )(w )(wk)(w )(b )(bx)(b )(w )(wx)(w )(b )(br)(b )\n" +
 				"(n   )(w   )(b   )(w   )(b   )(w   )(b   )(w   )(b   )\n" +

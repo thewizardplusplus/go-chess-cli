@@ -11,6 +11,8 @@ type OptionalColor struct {
 }
 
 // ...
+//
+// nolint: gochecknoglobals
 var (
 	WithoutColor OptionalColor
 )
